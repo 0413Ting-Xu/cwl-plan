@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>聯賽分配</title>
+<link rel="icon" href="img/etc-96.png">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Russo+One&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* 聯賽分配（2026-11-15，筆記/聯賽分配.md）。顏色跟統計頁同一套名字 */
+:root{
+  --ink:#11141d; --s1:#1a1f2e; --s2:#232a3b; --s3:#2c3446;
+  --line:#333c52; --line2:#455170;
+  --tx:#e9ecf4; --tx2:#9aa3bb; --tx3:#6b748d; --tx4:#555c70;
+  --soft:#8e9ce6; --good:#6fbf8b; --warm:#d6a05f; --loss:#d9584e; --pick:#6d7cf5;
+  --steel:#9fb6d6; --r:10px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--ink);color:var(--tx);font-family:Rubik,'Noto Sans TC',-apple-system,sans-serif;font-size:15px}
+body{min-height:100vh;padding:0 0 80px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+input,select{font:inherit;font-size:16px;color:var(--tx);background:var(--s1);border:1px solid var(--line);border-radius:8px;padding:9px 11px;outline:none;width:100%}
+input:focus{border-color:var(--line2)}
+.cp-wrap{max-width:760px;margin:0 auto;padding:0 16px}
+.cp-top{position:sticky;top:0;z-index:20;background:rgba(17,20,29,.94);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.cp-hd{display:flex;align-items:center;gap:10px;padding:12px 0 8px}
+.cp-ttl{font-weight:700;font-size:18px;letter-spacing:.5px;flex:1;min-width:0}
+.cp-mon{display:flex;align-items:center;gap:2px;font-weight:600;color:var(--tx2)}
+.cp-mon button{width:30px;height:30px;border-radius:8px;color:var(--tx3);font-size:18px}
+.cp-mon b{min-width:62px;text-align:center;color:var(--tx);font-weight:600}
+.cp-tabs{display:flex;gap:4px;padding-bottom:8px}
+.cp-tab{flex:1;padding:8px 0;border-radius:8px;color:var(--tx3);font-weight:600;font-size:14px;position:relative}
+.cp-tab.on{background:var(--s2);color:var(--tx)}
+.cp-dot{display:inline-block;min-width:18px;height:18px;line-height:18px;padding:0 5px;border-radius:9px;background:var(--loss);color:#fff;font-size:11px;margin-left:5px;vertical-align:1px}
+.cp-sv{font-size:12px;color:var(--tx3);min-width:44px;text-align:right}
+.cp-sv.bad{color:var(--loss)}
+.cp-bar{margin:12px 0 0;padding:10px 12px;border-radius:var(--r);background:rgba(217,88,78,.12);border:1px solid rgba(217,88,78,.4);color:#f0b3ad;font-size:14px;display:flex;gap:10px;align-items:center}
+.cp-bar button{margin-left:auto;padding:6px 10px;border-radius:8px;background:var(--s3);color:var(--tx);font-size:13px;white-space:nowrap}
+.cp-ov{margin:14px 0 4px;padding:4px 0;background:linear-gradient(180deg,#1f2535,#191e2c);border:1px solid #2a3248;border-radius:14px;display:grid;grid-template-columns:1fr}
+.cp-ovr{display:flex;align-items:center;gap:10px;width:100%;padding:7px 14px;text-align:left;font-size:14px}
+.cp-ovr img{width:22px;height:22px;object-fit:contain;flex:none}
+.cp-ovr .nm{flex:1;min-width:0;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-ovr .cp-cnt{font-size:14px}
+.cp-ovr.un{border-top:1px solid #2a3248;margin-top:4px;padding-top:10px}
+.cp-ovr.un .nm{color:var(--tx3)}
+.cp-ovr.un i{width:22px;flex:none}
+@media(min-width:640px){.cp-ov{grid-template-columns:1fr 1fr;column-gap:8px}.cp-ovr.un{grid-column:1/-1}}
+.cp-card{scroll-margin-top:110px}
+.cp-sha{margin-top:10px;gap:8px;flex-wrap:wrap}
+.cp-tg{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--tx2);padding:6px 2px}
+.cp-tg i{width:34px;height:20px;border-radius:10px;background:var(--s3);position:relative;flex:none}
+.cp-tg i::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--tx3);transition:transform .15s}
+.cp-tg.on i{background:#33406e}.cp-tg.on i::after{transform:translateX(14px);background:#dfe4ff}
+.cp-shl{display:flex;flex-direction:column;align-items:center;gap:18px;padding:16px 16px 40px}
+.cp-shi{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:420px}
+.cp-shi img{width:100%;border-radius:12px;border:1px solid #2a3248}
+/* 產圖用（畫面外）：直式 420 寬、30 人的部落 640 寬兩欄。WebKit 產圖 grid 裡有圖會撐高 → 全用 flex；不用 box-shadow */
+.cp-img{position:fixed;left:-10000px;top:0;width:420px;display:flex;flex-direction:column;gap:12px;padding:22px 20px 16px;background:#0b1221;color:var(--tx);font-family:Rubik,'Noto Sans TC',sans-serif}
+.cp-img.wide{width:640px}
+.ci-hd{display:flex;align-items:center;gap:14px;padding:4px 4px 14px;border-bottom:1px solid #2a3248}
+.ci-bd{width:64px;height:64px;object-fit:contain;flex:none}
+.ci-ht{display:flex;flex-direction:column;gap:3px;min-width:0}
+.ci-mo{font-size:13px;color:#93a3c4;letter-spacing:1px}
+.ci-ht b{font-size:23px;font-weight:700;color:#fff;line-height:1.25}
+.ci-lg{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:#9aa3bb}
+.ci-lg span{display:flex;align-items:center;gap:5px}
+.ci-lg img{width:22px;height:22px;object-fit:contain}
+.ci-lg i{font-style:normal;color:#555c70}
+.ci-ls{display:flex;flex-direction:column;gap:6px}
+.ci-ls.two{flex-direction:row;flex-wrap:wrap;gap:6px 10px}
+.ci-ls.two .ci-r{width:calc(50% - 5px)}
+.ci-r{display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:10px;background:linear-gradient(180deg,#1f2535,#191e2c);border:1px solid #2a3248}
+.ci-n{width:20px;text-align:right;font-family:'Russo One',Rubik,sans-serif;font-size:14px;color:#6b748d;flex:none}
+.ci-w{flex:1;min-width:0;display:flex;flex-direction:column}
+.ci-w b{font-size:16px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci-w small{font-size:12px;color:#93a3c4;margin-top:1px}
+.ci-r .ficw{--ic:30px}
+.ci-sub{font-size:13px;font-weight:600;color:#93a3c4;letter-spacing:1px;margin:4px 0 -4px 4px}
+.ci-ft{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#93a3c4;padding-top:6px}
+.ci-ft span{display:flex;align-items:center;gap:6px}
+.ci-ft img{width:26px;height:26px}
+.ci-lgl{font-family:Rubik,sans-serif;font-size:9px;color:#55607a;text-align:center}
+.cp-cfs{display:flex;flex-wrap:wrap;gap:8px 14px;padding:10px 14px;border-bottom:1px solid #2a3248;background:rgba(15,19,32,.35)}
+.cp-cfs span{display:flex;align-items:center;gap:5px}
+.cp-cfs .ficw{--ic:24px}
+.cp-cfs b{font-family:'Russo One',Rubik,sans-serif;font-weight:400;font-size:14px;color:var(--tx)}
+/* 三星率紅綠分段（11/16 他選甲：推翻「工具不下結論」，這頁給首領挑人用） */
+.cp-r.hi{color:var(--good)}.cp-r.lo{color:var(--loss)}
+.cp-sp{flex:1}
+.cp-acts{display:flex;gap:8px;margin:10px 0 2px;flex-wrap:wrap}
+.cp-btn{padding:9px 14px;border-radius:8px;background:var(--s2);border:1px solid var(--line);font-size:14px;font-weight:500;color:var(--tx)}
+.cp-btn.pri{background:#2b3560;border-color:#46528a;color:#dfe4ff}
+.cp-btn.sm{padding:6px 10px;font-size:13px}
+.cp-btn:disabled{opacity:.4}
+.cp-card{margin:14px 0;background:var(--s1);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.cp-ch{display:flex;align-items:center;gap:10px;padding:12px 12px 10px;border-bottom:1px solid var(--line)}
+.cp-ch img{width:34px;height:34px;flex:none}
+.cp-cn{flex:1;min-width:0}
+.cp-cn b{display:block;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-cn>span{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--tx3);margin-top:3px;white-space:nowrap}
+.cp-cnt{font-weight:600;font-size:15px;color:var(--tx2);white-space:nowrap}
+.cp-cnt.full{color:var(--good)}
+.cp-cnt.over{color:var(--warm)}
+.cp-ic{width:34px;height:34px;border-radius:8px;display:grid;place-items:center;color:var(--tx3);flex:none}
+.cp-ic:active{background:var(--s2)}
+.cp-ic svg{width:18px;height:18px}
+.cp-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-top:1px solid rgba(51,60,82,.55)}
+.cp-row:first-child{border-top:0}
+.cp-n{width:22px;text-align:right;color:var(--tx4);font-size:13px;flex:none;font-variant-numeric:tabular-nums}
+.cp-who{flex:1;min-width:0}
+.cp-gn{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-gn em{font-style:normal;color:var(--tx3);font-weight:400;font-size:13px;margin-left:6px}
+.cp-st{font-size:12.5px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-st .l1{color:var(--steel)}
+.cp-th{font-size:11px;color:var(--tx3);border:1px solid var(--line);border-radius:5px;padding:1px 4px;margin-right:6px;font-variant-numeric:tabular-nums}
+.cp-th.low{color:var(--warm);border-color:rgba(214,160,95,.5)}
+.cp-sub{padding:7px 12px 5px;font-size:12px;color:var(--tx3);background:rgba(0,0,0,.12);border-top:1px solid var(--line)}
+.cp-add{display:block;width:100%;padding:11px 12px;text-align:left;color:var(--soft);font-weight:500;border-top:1px solid var(--line)}
+.cp-det{padding:4px 12px 10px 44px;font-size:12.5px;color:var(--tx2)}
+.cp-det table{border-collapse:collapse;width:100%}
+.cp-det td{padding:3px 6px 3px 0;white-space:nowrap}
+.cp-det td.r{text-align:right;font-variant-numeric:tabular-nums}
+.cp-det .mute{color:var(--tx3)}
+.cp-empty{padding:14px 12px;color:var(--tx3);font-size:14px}
+/* 選人 */
+.cp-sheet{position:fixed;inset:0;z-index:50;background:var(--ink);display:flex;flex-direction:column}
+.cp-sh{padding:10px 16px 8px;border-bottom:1px solid var(--line);background:var(--ink)}
+.cp-shr{display:flex;align-items:center;gap:8px;max-width:760px;margin:0 auto}
+.cp-sht{flex:1;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-flt{display:flex;gap:6px;max-width:760px;margin:8px auto 0}
+.cp-flt button{padding:6px 11px;border-radius:8px;font-size:13px;color:var(--tx3);border:1px solid var(--line)}
+.cp-sws{display:flex;gap:6px;max-width:760px;margin:8px auto 0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+.cp-sws::-webkit-scrollbar{display:none}
+.cp-sws button{flex:none;display:flex;align-items:center;gap:6px;padding:6px 10px 6px 7px;border-radius:10px;border:1px solid #2a3248;background:linear-gradient(180deg,#1f2535,#191e2c);font-size:13px;color:var(--tx2)}
+.cp-sws button img{width:20px;height:20px;object-fit:contain}
+.cp-sws button span{max-width:7.5em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-sws button .cp-cnt{font-size:12.5px}
+.cp-sws button.on{color:#fff;background:linear-gradient(180deg,#334252,#222b36);border-color:rgba(150,178,206,.6)}
+/* 電腦（滑鼠）沒辦法左右滑：部落和流派那兩排改成排不下就換行（11/16 他：電腦版不能滑動） */
+@media (hover:hover) and (pointer:fine){.cp-sws,.cp-ffl{flex-wrap:wrap;overflow:visible}}
+.cp-ffl{display:flex;align-items:center;gap:6px;max-width:760px;margin:8px auto 0;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:2px 0 4px;scrollbar-width:none}
+.cp-ffl::-webkit-scrollbar{display:none}
+.cp-ffk{flex:none;font-size:13px;color:var(--tx3);margin-right:2px}
+/* 每一顆像一塊可以按的小磚：底色＋外框，按下去變藍、右上打勾（11/16 他：看不出來可以點） */
+.cp-ffl button{position:relative;flex:none;display:flex;align-items:center;gap:5px;padding:5px 9px 5px 6px;border-radius:10px;background:var(--s2);border:1px solid var(--line);box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 2px 4px rgba(0,0,0,.25)}
+.cp-ffl button:active{transform:translateY(1px)}
+.cp-ffl button .ficw{--ic:24px}
+.cp-ffl button small{font-size:12.5px;color:var(--tx2);font-family:'Russo One',Rubik,sans-serif}
+.cp-ffl button.on{background:#2b3560;border-color:#7d8cf0}
+.cp-ffl button.on small{color:#fff}
+.cp-ffc{position:absolute;top:-6px;right:-5px;width:16px;height:16px;border-radius:50%;background:#7d8cf0;color:#11141d;font:700 10px/16px Rubik,sans-serif;text-align:center}
+.cp-ffl button.clr{padding:7px 11px;font-size:13px;color:var(--tx2);background:transparent}
+.cp-flt button.on{color:var(--tx);background:var(--s2);border-color:var(--line2)}
+.cp-sl{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.cp-sl>div{max-width:760px;margin:0 auto}
+.cp-pk{display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;text-align:left;border-bottom:1px solid rgba(51,60,82,.55)}
+.cp-pk:active{background:var(--s1)}
+.cp-pk .cp-where{font-size:12px;color:var(--tx3);white-space:nowrap}
+.cp-pk .cp-where.here{color:var(--good)}
+/* 名冊 */
+.cp-srch{margin:14px 0 6px}
+.cp-h2{margin:18px 0 6px;font-size:13px;color:var(--tx3);font-weight:600;letter-spacing:.5px}
+.cp-pp{border-top:1px solid rgba(51,60,82,.55)}
+.cp-pp:first-child{border-top:0}
+.cp-ph{display:flex;align-items:center;gap:10px;width:100%;padding:11px 12px;text-align:left}
+.cp-ph .cp-who b{font-weight:500}
+.cp-ph .cp-who>span{display:block;font-size:12.5px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-pc{color:var(--tx3);font-size:13px;white-space:nowrap}
+.cp-pb{padding:2px 12px 12px}
+.cp-fr{display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:center;margin:8px 0}
+.cp-fr label{font-size:13px;color:var(--tx3)}
+.cp-ar{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid rgba(51,60,82,.4)}
+.cp-in{display:flex;gap:8px;margin-top:8px}
+.cp-in input{flex:1;min-width:0}
+.cp-q{padding:11px 12px;border-top:1px solid rgba(51,60,82,.55)}
+.cp-q:first-child{border-top:0}
+.cp-qt{font-size:14px}
+.cp-qt b{font-weight:600}
+.cp-qt span{color:var(--tx3);font-size:13px}
+.cp-qo{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.cp-qo:empty{display:none}
+.cp-qo button{padding:7px 10px;border-radius:8px;background:var(--s2);border:1px solid var(--line);font-size:13px;text-align:left}
+.cp-qo button.on{background:#2b3560;border-color:#46528a;color:#dfe4ff}
+.cp-qo button.go{color:var(--good)}
+.cp-qo button:disabled{opacity:.4}
+.cp-qo button small{display:block;color:var(--tx3);font-size:11.5px;margin-top:1px}
+/* 名冊改版（11/16 他：「遊戲帳號的字不要用這麼淡」「這頁太樸素 看了不太舒服 也不是很清楚」） */
+.cp-tiles{display:grid;grid-template-columns:repeat(3,1fr);margin:14px 0 0;background:linear-gradient(180deg,#1f2535,#191e2c);border:1px solid #2a3248;border-radius:14px}
+.cp-tile{padding:12px 6px 10px;text-align:center}
+.cp-tile+.cp-tile{border-left:1px solid #2a3248}
+.cp-tile b{display:flex;align-items:center;justify-content:center;gap:5px;font-family:'Russo One',Rubik,sans-serif;font-weight:400;font-size:22px;color:#fff;line-height:1.2}
+.cp-tile span{display:flex;align-items:center;justify-content:center;height:30px;font-size:12px;color:var(--tx3);margin-top:2px}
+/* 傳一：遊戲裡那個徽章的樣子，右下角深色小牌、金框白色羅馬數字（只有名冊這格，圖夠大才掛） */
+.cp-tile .cp-tlg{position:relative;width:30px;margin:2px auto 0}
+.cp-tlg img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}
+.cp-tlg i{position:absolute;right:-6px;bottom:0;min-width:14px;height:14px;padding:0 3px;border-radius:3px;background:linear-gradient(180deg,#2b2117,#0f0b07);border:1.5px solid #e2b062;color:#fff;font:700 11px/11px Georgia,'Times New Roman',serif;font-style:normal;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.7)}
+.cp-sbox{position:relative;margin:12px 0 4px}
+.cp-sbox svg{position:absolute;left:12px;top:50%;width:17px;height:17px;margin-top:-8.5px;color:var(--tx3);pointer-events:none}
+.cp-sbox input{padding-left:38px;border-radius:12px;background:#151a27}
+.cp-h3{display:flex;align-items:center;gap:8px;margin:18px 2px 8px;font-size:14px;font-weight:600;color:var(--tx2)}
+.cp-h3 .cp-num{font-size:14px}
+.cp-h3.warn{color:var(--warm)}
+.cp-h3.warn .cp-num{color:var(--warm)}
+.cp-pp.op{background:rgba(255,255,255,.025)}
+.cp-ph{align-items:flex-start;padding:12px 12px 12px 14px}
+.cp-pn{display:flex;align-items:baseline;gap:8px;min-width:0}
+.cp-pn b{font-size:15.5px;font-weight:600;color:var(--tx);white-space:nowrap}
+.cp-pn small{font-size:12px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.cp-al{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px}
+.cp-ac{display:inline-flex;align-items:center;gap:5px;font-size:13.5px;color:#dfe5f0;max-width:100%}
+.cp-ac span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.cp-ac .cp-pli{width:16px;height:16px}
+.cp-nol{width:16px;height:16px;flex:none;display:inline-grid;place-items:center}
+.cp-nol::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--tx4)}
+.cp-pc{display:flex;align-items:center;gap:6px;margin-top:2px;font-family:'Russo One',Rubik,sans-serif;font-size:14px;color:var(--tx2)}
+.cp-pc svg{width:16px;height:16px;color:var(--tx3);transition:transform .15s}
+.cp-pp.op .cp-pc svg{transform:rotate(180deg)}
+.cp-pb{padding:0 12px 14px 14px}
+.cp-ar{gap:10px;padding:10px 0;border-top-color:#2a3248}
+.cp-ar .cp-gn{display:flex;align-items:center;gap:6px;color:var(--tx)}
+.cp-ar .cp-gn em{margin-left:2px}
+.cp-pool{max-height:260px;overflow-y:auto;margin-top:6px;border:1px solid var(--line);border-radius:8px}
+.cp-pool button{display:flex;gap:8px;width:100%;padding:8px 10px;text-align:left;border-top:1px solid rgba(51,60,82,.4);font-size:14px}
+.cp-pool button:first-child{border-top:0}
+.cp-pool small{color:var(--tx3);margin-left:auto}
+/* 殼子 */
+.cp-sr{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid rgba(51,60,82,.55)}
+.cp-sr:first-child{border-top:0}
+.cp-sr img{width:30px;height:30px;flex:none}
+.cp-sw{width:44px;height:26px;border-radius:13px;background:var(--s3);position:relative;flex:none;transition:background .15s}
+.cp-sw::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--tx3);transition:transform .15s,background .15s}
+.cp-sw.on{background:#33406e}
+.cp-sw.on::after{transform:translateX(18px);background:#dfe4ff}
+.cp-sz{width:auto;padding:6px 8px;font-size:14px}
+.cp-gate{max-width:320px;margin:22vh auto 0;padding:0 16px;text-align:center}
+.cp-gate h1{font-size:20px;font-weight:700;margin:0 0 18px}
+.cp-gate input{text-align:center;letter-spacing:4px}
+.cp-gate p{color:var(--loss);font-size:14px;min-height:20px}
+.cp-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--s3);border:1px solid var(--line2);padding:9px 16px;border-radius:10px;font-size:14px;z-index:80;max-width:calc(100% - 32px);text-align:center}
+.cp-hide{display:none!important}
+/* 流派頭像：統計頁那套，做預覽／上線時從 site/group-view.html 現抓（wip/flowkit_1116.py） */
+.ficw{position:relative;flex:none;display:inline-flex;gap:2px;align-items:center;justify-content:center;min-height:var(--ic,30px)}
+.fic{width:var(--ic,30px);height:var(--ic,30px);border-radius:8px;overflow:hidden;background:#11141d;display:flex;align-items:center;justify-content:center;flex:none;color:var(--tx2);font-size:calc(var(--ic,30px) * .36);font-weight:600;line-height:1.15;text-align:center}
+.fic img{width:100%;height:100%;display:block;object-fit:contain}   /* 9/30：大金龍那種寬圖不壓扁、不裁切（粉絲政策不能改圖），方形的圖看起來一樣 */
+.fic.q{font:700 15px 'Rubik',sans-serif}
+.fic.txt{font-size:calc(var(--ic,30px) * .26);line-height:1.05;padding:1px;word-break:break-all;letter-spacing:-.02em}
+.fic.none{background:transparent;border:1px dashed var(--line)}
+.fic.sd{width:calc(var(--ic,30px) * .72);height:calc(var(--ic,30px) * .72);border-radius:6px}
+.fic svg{width:58%;height:58%}
+.ffb{position:absolute;right:-4px;bottom:-4px;width:calc(var(--ic,30px) * .46);filter:drop-shadow(0 0 2px #000)}
+.ffb.ffv{width:calc(var(--ic,30px) * .6)}   /* 變體的裝備角標（2026-10-17 他說太小；火球照舊） */
+.ffb.ffl{right:auto;left:-4px}   /* 藍胖的角標掛左下（右下會卡在嘴巴） */
+.cp-st{display:flex;align-items:center;gap:5px}
+.cp-st .ficw{--ic:20px}
+.cp-st .ficw.sm{--ic:15px;opacity:.85}
+.cp-det .ficw{--ic:24px}
+.cp-d7{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+/* 11/16 改版（他：「很暗沉」「參照統計頁聯賽畫面的優點」）：卡片、徽章、顏色照統計頁聯賽區 */
+.cp-card{background:linear-gradient(180deg,#1f2535,#191e2c);border-color:#2a3248;border-radius:14px}
+.cp-ch{border-bottom-color:#2a3248}
+.cp-num{font-family:'Russo One',Rubik,sans-serif;font-weight:400;color:var(--tx);font-size:14px;letter-spacing:.2px}
+.cp-cnt{font-family:'Russo One',Rubik,sans-serif;font-weight:400;font-size:16px}
+.cp-lg{display:inline-flex;align-items:center;gap:4px;font-weight:600}
+.cp-lg img{width:18px;height:18px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+.cp-pli{width:17px;height:17px;object-fit:contain;flex:none}
+.cp-st .cp-k{color:var(--tx3)}
+.cp-st .l1{color:#cfd8ea}
+.cp-fl{display:flex;align-items:center;gap:3px;flex:none}
+.cp-fl .ficw{--ic:28px}
+.cp-fl .ficw.sm{--ic:19px}
+.cp-row .cp-ic{width:28px;height:28px;color:var(--tx4)}
+.cp-gn em{color:var(--tx3)}
+.cp-det{padding:2px 12px 12px 44px}
+.cp-d7{gap:10px;margin:2px 0 10px}
+.cp-dl{display:flex;align-items:baseline;gap:8px;margin:0 0 6px;font-size:14px}
+.cp-dl b{font-weight:600;color:var(--tx)}
+.cp-d7 .cp-k{color:var(--tx3);font-size:12.5px}
+.cp-big{font-family:'Russo One',Rubik,sans-serif;font-weight:400;font-size:20px;color:#fff}
+.cp-d7 .ficw{--ic:26px}
+.cp-cw{display:flex;flex-direction:column;gap:2px}
+.cp-cwr{display:grid;grid-template-columns:38px 70px minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:5px 8px;border-radius:8px;background:rgba(15,19,32,.55);font-size:13px}
+.cp-cwr .m{color:var(--tx3)}
+.cp-cwr .cn{color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-cwr .s{color:var(--tx2);font-variant-numeric:tabular-nums}
+.cp-cwr .r{text-align:right;color:var(--tx2);white-space:nowrap;display:flex;align-items:center;justify-content:flex-end;gap:4px}
+.cp-cwr .r b,.cp-cwr .s b{font-family:'Russo One',Rubik,sans-serif;font-weight:400;color:var(--tx)}
+</style>
+</head>
+<body>
+<div id="cpApp"></div>
+<script>
+/* ======== 設定 ======== */
+var CP_VERSION='2026-11-15a';
+var SUPA_URL='https://evmfmwpsgnccnsaxlafz.supabase.co', SUPA_KEY='sb_publishable_y1ObqeSRZ4AD8pMSeZ1zsQ_nvtd_aFQ';
+var CP_G='legend1';
+var CP_PASS='2330';   /* 進這頁的密碼（他決定） */
+var CP_PV=window.CP_PV||null;   /* 預覽：資料直接放在頁面裡、改的東西只存這支手機，不碰雲端 */
+
+/* ======== 狀態 ======== */
+var R={people:[],inbox:[]};      /* 人名冊 _roster:legend1 */
+var P={a:{},cl:{},pool:{}};       /* 每個帳號的數字 _cwlpick:legend1（Mac mini 寫） */
+var F=[];                          /* 聯賽收藏的部落 _cwl:legend1:*（跟統計頁同一份） */
+var PL=null;                       /* 這個月的分配 _cwlplan:legend1:<月> */
+var BASE={};                       /* 每一列讀進來時的 at：存之前比對，別人改過就不蓋 */
+var UI={ibSel:{},tab:'plan',mon:'',open:{},popen:{},q:'',sheet:null,conflict:'',save:'',det:''};
+var OWN={};                        /* 帳號 → 人 */
+
+/* ======== 小工具 ======== */
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function cpTag(s){
+  s=String(s||'');var m=/[?&]tag=(?:%23|#)?([0-9a-z]+)/i.exec(s);if(m)s=m[1];
+  var t=s.toUpperCase().replace(/O/g,'0').replace(/[^0-9A-Z]/g,'');
+  return /^[0289PYLQGRJCUV]{4,12}$/.test(t)?'#'+t:'';
+}
+function twNow(){return new Date(Date.now()+8*3600e3)}
+function monAdd(m,n){var y=+m.slice(0,4),mo=+m.slice(5,7)-1+n;y+=Math.floor(mo/12);mo=((mo%12)+12)%12;return y+'-'+String(mo+1).padStart(2,'0')}
+function monDef(){   /* 13 號以後排下個月 */
+  var d=twNow(),m=d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0');
+  return d.getUTCDate()>=13?monAdd(m,1):m;
+}
+function monZh(m){return +m.slice(5,7)+' 月'}
+var LG_W={Bronze:'青銅',Silver:'白銀',Gold:'黃金',Crystal:'水晶',Master:'大師',Champion:'冠軍',Titan:'泰坦'},LG_N={I:'一',II:'二',III:'三'};
+function lgZh(n){   /* 聯賽難度：Titan League II → 泰坦二；Legend League → 傳說 */
+  n=String(n||'');if(/^Legend League/.test(n))return '傳說';
+  var m=/^(\w+) League (I{1,3})$/.exec(n);return m&&LG_W[m[1]]?LG_W[m[1]]+LG_N[m[2]]:'';
+}
+function tierZh(n){return n==='Legend I'?'傳一':n==='Legend II'?'傳二':n==='Legend III'?'傳三':''}
+function nameOf(t){var a=P.a[t];return a&&a.n?a.n:(P.pool[t]?P.pool[t][0]:t)}
+function ownerOf(t){return OWN[t]||null}
+function ibKey(x){return x.pid+'|'+x.form}   /* 待確認那一列勾了哪幾隻（只在畫面上，按好了才存） */
+function pName(p){var l=String(p&&p.line||'').trim();return l&&l!=='無'?l:(p&&p.dc||'')}   /* Line 填「無」的顯示 DC */
+function calcOwn(){OWN={};R.people.forEach(function(p){(p.a||[]).forEach(function(t){OWN[t]=p})})}
+function toast(s){var e=document.createElement('div');e.className='cp-toast';e.textContent=s;document.body.appendChild(e);setTimeout(function(){e.remove()},1800)}
+var IC={
+  share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>',
+  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+  dn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'
+};
+
+/* ======== 流派頭像（統計頁同一套，注入的） ======== */
+var AUTO='自動防守';function colorOf(n){return flowColor(n)}
+const FLOW_COLORS={'鉛筆':'#e0a82e','藍胖':'#5aa9f0','雙龍':'#e2603f','龍騎':'#57c08a','超雪':'#e88ab0','其他':'#4fc4c9',
+  '火球馬雲':'#c9a06a','火球阿婆':'#8a93c9','火球超女巫':'#a8c256','狗球':'#c77d8f','超弓':'#5f9ea0','火球小拳石':'#b47ce8','超龍':'#f08c5a',
+  '積木':'#7e8aa0','火球廢女巫':'#7e8aa0'};
+const FLOW_SPARE=['#b47ce8','#f08c5a','#6fd0a8','#d8d27a'];
+function flowColor(n){
+  if(n===AUTO)return '#5f6a85';
+  if(FLOW_COLORS[n])return FLOW_COLORS[n];
+  if(!n)return '#7e8aa0';
+  let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))>>>0;
+  return FLOW_SPARE[h%FLOW_SPARE.length];
+}
+var FLOW_ICON={'鉛筆':'thrower','藍胖':'super-bowler','雙龍':['dragon','dragon-rider'],'龍騎':'dragon-rider',
+  '火球馬雲':'super-minion','火球超女巫':'super-witch','火球阿婆':'ruin-witch','狗球':'balloon','超雪':'super-yeti','超弓':'super-archer','火球小拳石':'xiaoquanshi','超龍':'gold-dragon',
+  '積木':'jimu','雷龍':'electro-dragon','大金龍':'gold-dragon'};
+var FLOW_FIREBALL={'火球馬雲':1,'火球超女巫':1,'火球阿婆':1,'火球小拳石':1};
+var VAR_INFO={'背包鉛筆':['鉛筆','beibao'],'發牌鉛筆':['鉛筆','fapai'],'背包雙龍':['雙龍','beibao'],'發牌雙龍':['雙龍','fapai'],
+  '擊暈器藍胖':['藍胖','jiyunqi',1],'發牌藍胖':['藍胖','fapai',1],'牙心藍胖':['藍胖','dianya',1],
+  '火球傳送狗球':['狗球','chuansong'],'傳送超龍':['超龍','chuansong']};
+var SHIELD_SVG='<svg viewBox="0 0 24 24"><path d="M12 2.5 4 5.5v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10v-6z" fill="none" stroke="#9aa3bb" stroke-width="2"/></svg>';
+function flowIcon(fl,v){
+  if(!fl)return '<span class="ficw"><span class="fic none"></span></span>';
+  if(fl===AUTO)return '<span class="ficw"><span class="fic">'+SHIELD_SVG+'</span></span>';
+  const k=FLOW_ICON[fl],ring=' style="border:2px solid '+colorOf(fl)+'"';
+  let h;
+  if(Array.isArray(k))h=k.map(x=>'<span class="fic sd"'+ring+'><img src="img/'+x+'.webp" alt=""></span>').join('');
+  else if(k)h='<span class="fic"'+ring+'><img src="img/'+k+'.webp" alt=""></span>';
+  else if(fl==='其他')h='<span class="fic q"'+ring+'>?</span>';
+  else h='<span class="fic'+(fl.length>2?' txt':'')+'"'+ring+'>'+esc(fl)+'</span>';
+  if(FLOW_FIREBALL[fl])h+='<img class="ffb" src="img/fireball.webp" alt="">';
+  else if(v&&VAR_INFO[v]&&VAR_INFO[v][0]===fl)h+='<img class="ffb'+(Array.isArray(k)?'':' ffv')+(VAR_INFO[v][2]?' ffl':'')+'" src="img/'+VAR_INFO[v][1]+'.webp" alt="">';   /* 變體的角標（2026-10-17）；一張頭像的放大一點（他 10/17 說太小），雙龍兩張並排的照舊；藍胖掛左下 */
+  return '<span class="ficw">'+h+'</span>';
+}
+/* 聯賽（部落）：統計頁 CWL_WLN 那三張圖＋聯賽區的字色；大師以下沒有圖 */
+var CP_EMB={'傳說':['cwl-chuanshuo','#cfb4ff'],'泰坦':['cwl-taitan','#f3d27a'],'冠軍':['cwl-guanjun','#ffb27c'],'大師':['','#9fb6d6']};
+function lgCol(z){return CP_EMB[String(z||'').slice(0,2)]||['','']}
+function lgTag(z){if(!z)return '';var e=lgCol(z);return '<span class="cp-lg"'+(e[1]?' style="color:'+e[1]+'"':'')+'>'+(e[0]?'<img src="img/'+e[0]+'.webp" alt="">':'')+esc(z)+'</span>'}
+/* 玩家段位小圖（統計頁 CWL_LGI 同一組） */
+var CP_LGI=[[/^Legend /,'lg-chuanqi'],[/^Electro /,'lg-leilong'],[/^Dragon /,'lg-feilong'],[/^Titan /,'lg-taitan']];
+function plIc(lg){   /* 小圖不掛角標（11/16 他：圖太小掛角標很醜）；傳一二三只在名冊那格用大圖＋羅馬數字 */
+  for(var i=0;i<CP_LGI.length;i++)if(CP_LGI[i][0].test(lg||''))return '<img class="cp-pli" src="img/'+CP_LGI[i][1]+'.webp" alt="">';return ''}
+function flIc(x,sm){if(!x||!x[0])return '';var h=flowIcon(x[0],x[1]||'');return sm?h.replace('class="ficw"','class="ficw sm"'):h}
+function flPair(l){return l?flIc(l[2])+flIc(l[3],1):''}
+
+/* ======== 每個帳號的一行數字（首領 11/15：在傳一看傳一，不在看過去聯賽） ======== */
+/* 三星率紅綠分段的切點（11/16 他選甲；切點是我訂的，要改改這裡）：傳一近 7 天、聯賽每一刀 */
+var RATE_CUT={l:[65,50],c:[90,70]};
+function rateOf(t){   /* 拿來比的三星率：傳一＝近 7 天傳奇進攻；其他＝上一次聯賽每一刀（他 11/16：少打刀是換候補，不算問題，所以不看總星數） */
+  var a=P.a[t]||{};
+  if(tierZh(a.lg)==='傳一')return a.l7&&a.l7[0]?['l',Math.round(100*a.l7[1]/a.l7[0])]:null;
+  var c=(a.cw||[])[0];return c&&c[6]?['c',Math.round(100*c[8]/c[6])]:null;
+}
+function rateCls(r,k){var c=RATE_CUT[k];return r>=c[0]?' cp-r hi':r<c[1]?' cp-r lo':''}
+function rateHtml(r,k,big){return big?'<b class="cp-big'+rateCls(r,k)+'">'+r+'%</b>':'<span class="cp-num'+rateCls(r,k)+'">'+r+'%</span>'}
+function statLine(t){   /* 11/16：流派頭像搬到最右邊（cp-fl），這行只放段位和數字 */
+  var a=P.a[t];if(!a)return '<span class="cp-k">抓資料中…</span>';
+  if(a.x)return '<span>標籤查不到</span>';
+  var tz=tierZh(a.lg),out=[];
+  if(tz==='傳一'){
+    out.push(plIc(a.lg)+'<span class="cp-num">'+(a.tr||0)+'</span>');
+    var l=a.l7;if(l&&l[0])out.push('<span class="cp-k">三星</span>'+rateHtml(Math.round(100*l[1]/l[0]),'l'));
+    return out.join('<span class="cp-k">·</span>');
+  }
+  if(tz)out.push(plIc(a.lg)+'<span class="l1">'+tz+'</span>');
+  var c=(a.cw||[])[0];
+  if(c&&c[6])out.push('<span class="cp-k">'+monZh(c[0])+'</span>'+lgTag(lgZh(c[3]))+'<span class="cp-num">'+c[6]+'</span><span class="cp-k">刀 三星</span><span class="cp-num'+rateCls(Math.round(100*c[8]/c[6]),'c')+'">'+c[8]+'</span><span class="cp-k">刀</span>');
+  else if(c)out.push('<span class="cp-k">'+monZh(c[0])+'</span>'+lgTag(lgZh(c[3]))+'<span class="cp-k">沒打</span>');
+  else out.push('<span class="cp-k">沒有聯賽紀錄</span>');
+  return out.join('<span class="cp-k">·</span>');
+}
+function thBadge(t){return ''}   /* 11/16 他：幾本不用寫 */
+function detail(t){   /* 點一列：近 7 天三星率＋過去聯賽一季一行（11/16 他：標籤、名字、DC 放名冊就好，這裡不放） */
+  var a=P.a[t]||{},h='',o=ownerOf(t);
+  if(o&&pName(o))h+='<div class="cp-dl"><span class="cp-k">Line</span><b>'+esc(pName(o))+'</b></div>';   /* 11/16 他：點開補 Line 名字 */
+  if(a.l7&&a.l7[0])h+='<div class="cp-d7"><span class="cp-k">近 '+(P.days||7)+' 天三星率</span>'+rateHtml(Math.round(100*a.l7[1]/a.l7[0]),'l',1)+flPair(a.l7)+'</div>';
+  var rows=(a.cw||[]).map(function(c){
+    return '<div class="cp-cwr"><span class="m">'+monZh(c[0])+'</span>'+(lgTag(lgZh(c[3]))||'<span>—</span>')+'<span class="cn">'+esc(c[2])+'</span><span class="s"><b>'+c[7]+'</b>星/'+c[6]+'刀</span><span class="r">三星 '+(c[6]?rateHtml(Math.round(100*c[8]/c[6]),'c'):'<b>—</b>')+'</span></div>'});
+  h+=rows.length?'<div class="cp-cw">'+rows.join('')+'</div>':'<div class="cp-k">沒有聯賽紀錄</div>';
+  return '<div class="cp-det">'+h+'</div>';
+}
+
+/* ======== 讀寫雲端 ======== */
+function vaSync(){var v=P.vi||{};Object.keys(v).forEach(function(k){if(!VAR_INFO[k])VAR_INFO[k]=v[k]})}   /* 值班台加的新變體（有角標圖的） */
+function sbGet(q){
+  return fetch(SUPA_URL+'/rest/v1/snapshots?'+q,{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY},cache:'no-store'}).then(function(r){if(!r.ok)throw r.status;return r.json()});
+}
+function rowOf(rows,id){for(var i=0;i<rows.length;i++)if(rows[i].id===id)return rows[i].payload;return null}
+function pvKey(id){return ((CP_PV&&CP_PV.pfx)||'cpv2:')+id}   /* 預覽換一批（11/16 名冊重匯、加取消帶入） */
+function loadAll(){
+  var m=UI.mon;
+  if(CP_PV){
+    var ls=function(id,d){try{var s=localStorage.getItem(pvKey(id));return s?JSON.parse(s):d}catch(e){return d}};
+    R=ls('_roster:'+CP_G,JSON.parse(JSON.stringify(CP_PV.roster)));P=CP_PV.pick;vaSync();F=ls('_cwlfav',CP_PV.favs);
+    PL=ls('_cwlplan:'+CP_G+':'+m,null);calcOwn();return Promise.resolve();
+  }
+  var ids=['_roster:'+CP_G,'_cwlpick:'+CP_G,'_cwlplan:'+CP_G+':'+m];
+  return Promise.all([
+    sbGet('select=id,payload&id=in.('+ids.map(function(x){return '"'+x+'"'}).join(',')+')'),
+    sbGet('select=payload&id=like._cwl:'+CP_G+':*')
+  ]).then(function(A){
+    R=rowOf(A[0],ids[0])||{people:[],inbox:[]};P=rowOf(A[0],ids[1])||{a:{},cl:{},pool:{}};PL=rowOf(A[0],ids[2]);
+    BASE[ids[0]]=R.at||'';BASE[ids[2]]=PL?PL.at||'':'';
+    F=A[1].map(function(r){return r.payload}).filter(Boolean);
+    R.people=R.people||[];R.inbox=R.inbox||[];P.a=P.a||{};vaSync();P.cl=P.cl||{};P.pool=P.pool||{};calcOwn();
+  });
+}
+var SAVE_T={};
+function saveRow(id,obj,kind){   /* 改完 0.8 秒存；別人在我讀進來之後改過 → 不蓋，叫他重新載入 */
+  obj.kind=kind;obj.group='_config';obj.g=CP_G;
+  clearTimeout(SAVE_T[id]);UI.save='…';drawSave();
+  SAVE_T[id]=setTimeout(function(){
+    var prev=BASE[id]||'',at=new Date().toISOString();
+    if(CP_PV){obj.at=at;try{localStorage.setItem(pvKey(id),JSON.stringify(obj))}catch(e){}UI.save='已存';drawSave();return}
+    sbGet('select=payload->>at&id=eq.'+encodeURIComponent(id)).then(function(r){
+      var cur=r&&r[0]?(r[0].at||''):'';
+      if(cur&&cur!==prev){UI.conflict='別人剛剛也改了這份，你最後一步沒存';UI.save='';draw();return null}
+      obj.at=at;
+      return fetch(SUPA_URL+'/rest/v1/snapshots',{method:'POST',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates'},
+        body:JSON.stringify([{id:id,player:'_config',device:'_config',updated_at:at,payload:obj}])}).then(function(x){
+          if(!x.ok)throw x.status;BASE[id]=at;UI.save='已存';drawSave()});
+    }).catch(function(){UI.save='沒存到';drawSave()});
+  },800);
+}
+function saveRoster(){calcOwn();saveRow('_roster:'+CP_G,R,'roster');needCheck()}
+/* 新貼的標籤：在雲端留紙條 _cwlneed:<組>，Mac mini 每分鐘看一次、抓完寫回 _cwlpick（11/16 他選每 1 分鐘）。
+   網頁這邊每 15 秒問一下 _cwlpick 的時間記號，變了才整份下載；全部到了就停，最多等 10 分鐘（Mac mini 關機就等它開機後補） */
+var NEED={tm:0,n:0,at:'',start:0};
+function needTags(){var L=[];R.people.forEach(function(p){(p.a||[]).forEach(function(t){if(!P.a[t])L.push(t)})});return L}
+function needPut(L){
+  if(CP_PV||!L.length)return;
+  fetch(SUPA_URL+'/rest/v1/snapshots',{method:'POST',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates'},
+    body:JSON.stringify([{id:'_cwlneed:'+CP_G,player:'_config',device:'_config',updated_at:new Date().toISOString(),payload:{kind:'cwlneed',group:'_config',g:CP_G,t:L,at:new Date().toISOString()}}])}).catch(function(){});
+}
+function needCheck(){
+  if(CP_PV)return;var L=needTags();if(!L.length)return;
+  needPut(L);NEED.n=0;NEED.start=Date.now();if(!NEED.tm)NEED.tm=setTimeout(needPoll,15000);
+}
+function needPoll(){
+  NEED.tm=0;var L=needTags();if(!L.length||Date.now()-NEED.start>600000)return;
+  sbGet('select=payload->>at&id=eq.'+encodeURIComponent('_cwlpick:'+CP_G)).then(function(r){
+    var at=r&&r[0]?r[0].at||'':'';
+    if(at&&at!==NEED.at){NEED.at=at;return sbGet('select=payload&id=eq.'+encodeURIComponent('_cwlpick:'+CP_G)).then(function(x){
+      var np=x&&x[0]&&x[0].payload;if(np&&np.a){P=np;P.cl=P.cl||{};P.pool=P.pool||{};vaSync();calcOwn();draw();if(UI.sheet)drawSheet()}})}
+  }).catch(function(){}).then(function(){
+    if(++NEED.n%8===0)needPut(needTags());   /* 兩分鐘還沒到：紙條可能被蓋掉，再留一次 */
+    if(needTags().length&&Date.now()-NEED.start<600000)NEED.tm=setTimeout(needPoll,15000);
+  });
+}
+function savePlan(){saveRow('_cwlplan:'+CP_G+':'+UI.mon,PL,'cwlplan')}
+function favPut(x){
+  if(CP_PV){try{localStorage.setItem(pvKey('_cwlfav'),JSON.stringify(F))}catch(e){}return Promise.resolve(true)}
+  var y=Object.assign({},x,{kind:'cwl',group:'_config',g:CP_G});
+  return fetch(SUPA_URL+'/rest/v1/snapshots',{method:'POST',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates'},
+    body:JSON.stringify([{id:'_cwl:'+CP_G+':'+y.t,player:'_config',device:'_config',updated_at:new Date().toISOString(),payload:y}])}).then(function(r){return r.ok}).catch(function(){return false});
+}
+
+/* ======== 分配 ======== */
+function favOn(){return F.filter(function(x){return x&&!x.off&&x.show!==false}).sort(function(a,b){return (a.o==null?99:a.o)-(b.o==null?99:b.o)||String(a.t).localeCompare(String(b.t))})}
+function shellInfo(t){var c=P.cl[t]||{},f=F.filter(function(x){return x.t===t})[0]||{};return {n:c.n||f.n||t,b:c.b||f.b||'',lg:lgZh(c.lg)}}
+function lastSize(t){   /* 上一次在這個殼子打的人數（15／30），沒紀錄就 15 */
+  var best=['',15];
+  Object.keys(P.a).forEach(function(k){((P.a[k]||{}).cw||[]).forEach(function(c){if(c[1]===t&&c[0]>best[0]&&(c[4]===15||c[4]===30))best=[c[0],c[4]]})});
+  return best[1];
+}
+function newPlan(){PL={m:UI.mon,sh:favOn().map(function(x){return {t:x.t,size:lastSize(x.t),a:[]}}),rest:[]};}
+function planAll(){var o={};if(!PL)return o;PL.sh.forEach(function(s){s.a.forEach(function(t){o[t]=s.t})});(PL.rest||[]).forEach(function(t){o[t]='rest'});return o}
+function shellTitle(s){var i=shellInfo(s.t);return (s.lbl||i.lg?(s.lbl||i.lg)+' ':'')+i.n}
+function copyText(list){
+  var L=[];
+  list.forEach(function(s){
+    var i=shellInfo(s.t);
+    L.push(shellTitle(s));L.push('https://link.clashofclans.com/cnt?action=OpenClanProfile&tag='+s.t.slice(1));
+    s.a.forEach(function(t,k){
+      if(k===s.size)L.push('候補');
+      var o=ownerOf(t),n=nameOf(t);L.push((k+1)+'. '+n+(o&&pName(o)&&pName(o)!==n?'（'+pName(o)+'）':''));
+    });
+    L.push('');
+  });
+  return L.join('\n').trim();
+}
+function copy(s){
+  var ok=function(){toast('已複製，可以貼到 Line')};
+  if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(s).then(ok,function(){fallbackCopy(s);ok()});
+  else{fallbackCopy(s);ok()}
+}
+function fallbackCopy(s){var t=document.createElement('textarea');t.value=s;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e){}t.remove()}
+function fromLast(){   /* 照上個月實際上場的帶入（ClashKing 記的出場紀錄） */
+  var pm=monAdd(UI.mon,-1),n=0,u={};
+  PL.sh.forEach(function(s){u[s.t]=s.a.slice()});PL.undo={a:u,rest:(PL.rest||[]).slice()};   /* 帶入前的樣子（他 11/16：要能一鍵返回） */
+  PL.sh.forEach(function(s){
+    var L=[];
+    R.people.forEach(function(p){(p.a||[]).forEach(function(t){
+      var c=((P.a[t]||{}).cw||[]).filter(function(x){return x[0]===pm&&x[1]===s.t})[0];
+      if(c&&!planAll()[t])L.push([t,c[5],nameOf(t)]);
+    })});
+    L.sort(function(a,b){return b[1]-a[1]||a[2].localeCompare(b[2])});
+    L.forEach(function(x){s.a.push(x[0]);n++});
+  });
+  if(!n)delete PL.undo;savePlan();draw();toast(n?'帶入 '+n+' 個帳號':'上個月沒有紀錄');
+}
+function rowHtml(t,k,where){
+  var o=ownerOf(t),dk=where+'|'+t,a=P.a[t]||{};
+  return '<div class="cp-row" data-det="'+esc(dk)+'"><span class="cp-n">'+(k+1)+'</span><div class="cp-who"><div class="cp-gn">'+esc(nameOf(t))+'</div><div class="cp-st">'+statLine(t)+'</div></div>'+
+    '<div class="cp-fl">'+flPair(a.l7)+'</div><button class="cp-ic" data-rm="'+esc(where)+'" data-t="'+esc(t)+'" aria-label="移除">'+IC.x+'</button></div>'+(UI.det===dk?detail(t):'');
+}
+function shellFlows(s){   /* 這個部落排的人（含候補）近 7 天最常用的流派，變體一層 */
+  var C={},K={};s.a.forEach(function(t){var l=(P.a[t]||{}).l7,f=l&&l[2];if(!f||!f[0])return;var k=f[0]+'|'+(f[1]||'');C[k]=(C[k]||0)+1;K[k]=f});
+  var L=Object.keys(C).sort(function(a,b){return C[b]-C[a]||a.localeCompare(b)});
+  return L.length?'<div class="cp-cfs">'+L.map(function(k){return '<span>'+flowIcon(K[k][0],K[k][1]||'')+'<b>'+C[k]+'</b></span>'}).join('')+'</div>':'';
+}
+function drawPlan(){
+  if(!PL)return '<div class="cp-card"><div class="cp-empty">'+monZh(UI.mon)+'還沒開始排。</div><div style="padding:0 12px 12px"><button class="cp-btn pri" data-act="new">開始排 '+monZh(UI.mon)+'</button></div></div>';
+  var all=planAll(),un=0;
+  R.people.forEach(function(p){(p.a||[]).forEach(function(t){if(!all[t])un++})});
+  var h='<div class="cp-ov">';   /* 11/16 他：膠囊太不整齊 → 一個殼子一行、人數靠右對齊 */
+  PL.sh.forEach(function(s){var n=s.a.length,c=n>s.size?'over':n===s.size?'full':'',i=shellInfo(s.t);
+    h+='<button class="cp-ovr" data-go="'+esc(s.t)+'">'+(i.b?'<img src="'+esc(i.b)+'" alt="">':'<i></i>')+'<span class="nm">'+esc(i.n)+'</span><span class="cp-cnt '+c+'">'+Math.min(n,s.size)+'/'+s.size+(n>s.size?'+'+(n-s.size):'')+'</span></button>'});
+  h+='<div class="cp-ovr un"><i></i><span class="nm">還沒排</span><span class="cp-cnt">'+un+'</span></div></div>';
+  var empty=PL.sh.every(function(s){return !s.a.length});
+  h+='<div class="cp-acts"><button class="cp-btn pri" data-act="share">分享到 Line</button>'+(empty?'<button class="cp-btn" data-act="last">照 '+monZh(monAdd(UI.mon,-1))+'實際上場帶入</button>':PL.undo?'<button class="cp-btn" data-act="undo">取消帶入</button>':'')+'</div>';
+  PL.sh.forEach(function(s,si){
+    var i=shellInfo(s.t),n=s.a.length,c=n>s.size?'over':n===s.size?'full':'';
+    var z=s.lbl||i.lg||'';
+    h+='<div class="cp-card" id="cpc_'+esc(s.t.slice(1))+'"><div class="cp-ch">'+(i.b?'<img src="'+esc(i.b)+'" alt="">':'')+'<div class="cp-cn"><b>'+esc(i.n)+'</b><span>'+(z?lgTag(z)+' · ':'')+s.size+' 人</span></div><span class="cp-cnt '+c+'">'+Math.min(n,s.size)+'/'+s.size+'</span>'+'<button class="cp-ic" data-copy="'+si+'" aria-label="分享">'+IC.share+'</button></div><div>';
+    h+=shellFlows(s);
+    s.a.forEach(function(t,k){if(k===s.size)h+='<div class="cp-sub">候補</div>';h+=rowHtml(t,k,s.t)});
+    h+='</div><button class="cp-add" data-pick="'+esc(s.t)+'">＋ 加人</button></div>';
+  });
+  h+='<div class="cp-card"><div class="cp-ch"><div class="cp-cn"><b>休</b><span>這個月不打</span></div><span class="cp-cnt">'+(PL.rest||[]).length+'</span></div><div>';
+  (PL.rest||[]).forEach(function(t,k){h+=rowHtml(t,k,'rest')});
+  h+='</div><button class="cp-add" data-pick="rest">＋ 加人</button></div>';
+  return h;
+}
+
+/* ======== 分享到 Line（11/16 他：不要只有文字版；圖片不能放太詳細的數據，其他成員看了會不舒服） ========
+   一個部落一張圖（號碼、遊戲名字、Line 名字、流派頭像可關），候補、休分開；不放盃數、三星率、過去聯賽。
+   部落連結點不了，另外一段文字只放部落名字和連結。產圖跟統計頁聯賽圖同一套（html2canvas、徽章走機器人的轉接、底下署名＋非官方聲明） */
+var CP_BPX='https://legend-bot.wuxiaoxu0413.workers.dev/badge?p=';
+var CP_LEGAL='This material is unofficial and is not endorsed by Supercell. For more information see Supercell\'s Fan Content Policy: www.supercell.com/fan-content-policy.';
+function badgePx(u){var m=/\/badges\/\d+\/([\w-]+\.png)$/.exec(u||'');return m?CP_BPX+'badges/200/'+m[1]:''}
+function linkText(){
+  var L=[monZh(UI.mon)+'聯賽'];
+  shareList().forEach(function(s){if(s.t==='rest')return;var z=s.lbl||shellInfo(s.t).lg;L.push('');L.push((z?'【'+z+'】':'')+shellInfo(s.t).n);L.push('https://link.clashofclans.com/cnt?action=OpenClanProfile&tag='+s.t.slice(1))});
+  return L.join('\n');
+}
+function shareList(){
+  var L=PL.sh.filter(function(s){return s.a.length&&(!UI.share.only||UI.share.only===s.t)});
+  if(!UI.share.only&&(PL.rest||[]).length)L.push({t:'rest',a:PL.rest,size:PL.rest.length});
+  return L;
+}
+function shareCard(s,fl){
+  var rest=s.t==='rest',i=rest?{n:'休',b:'',lg:''}:shellInfo(s.t),z=rest?'':(s.lbl||i.lg),e=lgCol(z),wide=s.size>15&&!rest;
+  var row=function(t,k){var l=(P.a[t]||{}).l7,f=l&&l[2];
+    return '<div class="ci-r"><span class="ci-n">'+(k+1)+'</span><div class="ci-w"><b>'+esc(nameOf(t))+'</b>'+'</div>'+(fl&&f?flowIcon(f[0],f[1]||''):'')+'</div>'};
+  var h='<div class="ci-hd">'+(i.b?'<img class="ci-bd" src="'+esc(badgePx(i.b))+'" alt="">':'')+'<div class="ci-ht"><span class="ci-mo">'+monZh(UI.mon)+'聯賽</span><b>'+esc(i.n)+'</b>'+
+    (z?'<span class="ci-lg"><span style="color:'+(e[1]||'#9aa3bb')+'">'+(e[0]?'<img src="img/'+e[0]+'.webp" alt="">':'')+esc(z)+'</span></span>':'')+'</div></div>';
+  var main=rest?s.a:s.a.slice(0,s.size),sub=rest?[]:s.a.slice(s.size);
+  h+='<div class="ci-ls'+(wide?' two':'')+'">'+main.map(row).join('')+'</div>';
+  if(sub.length)h+='<div class="ci-sub">候補</div><div class="ci-ls'+(wide?' two':'')+'">'+sub.map(function(t,k){return row(t,s.size+k)}).join('')+'</div>';
+  h+='<div class="ci-ft"><span><img src="img/etc-96.png" alt=""></span><span>'+monZh(UI.mon)+'聯賽</span></div><div class="ci-lgl">'+esc(CP_LEGAL)+'</div>';
+  return {html:h,wide:wide,name:monZh(UI.mon).replace(' ','')+'聯賽_'+i.n.replace(/[\\/:*?"<>|\s]+/g,'')+'.png'};
+}
+function shareOpen(only){UI.share={only:only,fl:true,imgs:[],urls:[]};drawShare();shareGen()}
+function drawShare(){
+  var el=$('cpShare'),sh=UI.share;
+  if(!sh){if(el){(sh&&sh.urls||[]).forEach(function(u){URL.revokeObjectURL(u)});el.remove()}document.body.style.overflow='';return}
+  if(!el){el=document.createElement('div');el.id='cpShare';el.className='cp-sheet';document.body.appendChild(el);document.body.style.overflow='hidden'}
+  var L=shareList(),can=!!(navigator.canShare&&window.File);
+  var h='<div class="cp-sh"><div class="cp-shr"><div class="cp-sht">分享到 Line</div><button class="cp-ic" data-act="shclose" aria-label="關閉">'+IC.x+'</button></div>'+
+    '<div class="cp-shr cp-sha"><button class="cp-btn pri" data-act="shall"'+(sh.busy?' disabled':'')+'>'+(can?'分享全部圖片':'下載全部圖片')+(L.length>1?'（'+L.length+' 張）':'')+'</button><button class="cp-btn" data-act="shtxt">複製部落連結</button>'+
+    '<span class="cp-sp"></span><button class="cp-tg'+(sh.fl?' on':'')+'" data-act="shfl"><i></i>流派頭像</button></div></div>';
+  h+='<div class="cp-sl"><div class="cp-shl">';
+  L.forEach(function(s,k){var u=sh.urls[k];
+    h+='<div class="cp-shi">'+(u?'<img src="'+u+'" alt="">':'<div class="cp-empty">產生中…</div>')+(u?'<button class="cp-btn sm" data-shone="'+k+'">'+(can?'分享這張':'下載這張')+'</button>':'')+'</div>'});
+  if(!L.length)h+='<div class="cp-empty">還沒排人</div>';
+  el.innerHTML=h+'</div></div>';
+}
+function shareGen(){
+  var sh=UI.share,L=shareList(),tok={};sh.tok=tok;sh.busy=1;sh.urls.forEach(function(u){URL.revokeObjectURL(u)});sh.imgs=[];sh.urls=[];drawShare();
+  if(typeof html2canvas!=='function'){toast('圖片元件沒載入，請連上網路後重試');return}
+  var k=0,next=function(){
+    if(sh.tok!==tok||UI.share!==sh)return;
+    if(k>=L.length){sh.busy=0;drawShare();return}
+    var c=shareCard(L[k],sh.fl),w=document.createElement('div');w.className='cp-img'+(c.wide?' wide':'');w.innerHTML=c.html;document.body.appendChild(w);
+    var wait=[].map.call(w.querySelectorAll('img'),function(im){return im.complete?null:new Promise(function(ok){im.onload=im.onerror=ok})}).filter(Boolean);
+    Promise.all(wait).then(function(){return html2canvas(w,{backgroundColor:'#0b1221',scale:3,useCORS:true})}).then(function(cv){
+      return new Promise(function(ok,no){cv.toBlob(function(b){b?ok(b):no(new Error('blob'))},'image/png')})}).then(function(b){
+      w.remove();if(sh.tok!==tok)return;sh.imgs[k]=new File([b],c.name,{type:'image/png'});sh.urls[k]=URL.createObjectURL(b);k++;drawShare();next()},
+      function(){w.remove();k++;next()});
+  };
+  next();
+}
+function shareFiles(F){
+  if(!F.length)return;
+  if(navigator.canShare&&navigator.canShare({files:F})){navigator.share({files:F}).catch(function(){});return}
+  F.forEach(function(f,i){setTimeout(function(){var u=URL.createObjectURL(f),a=document.createElement('a');a.href=u;a.download=f.name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000)},i*400)});
+}
+
+/* ======== 選人（全螢幕） ======== */
+function pickList(){
+  var all=planAll(),q=UI.q.trim().toLowerCase(),L=[];
+  R.people.forEach(function(p){(p.a||[]).forEach(function(t){
+    if(UI.sheet.f==='un'&&all[t])return;
+    var fs=UI.sheet.fl||{};if(Object.keys(fs).length&&!flowsOf(t).some(function(f){return fs[f]}))return;
+    var a=P.a[t]||{},hay=(nameOf(t)+' '+pName(p)+' '+(p.dc||'')+' '+t).toLowerCase();
+    if(q&&hay.indexOf(q)<0)return;
+    var l1=tierZh(a.lg)==='傳一',c=(a.cw||[])[0];
+    var rr=rateOf(t);
+    L.push({t:t,p:p,un:!all[t],l1:l1,s1:l1?(a.tr||0):0,s2:c?c[7]/Math.max(1,c[6]):-1,rt:rr?rr[1]:-1,n:nameOf(t)});
+  })});
+  L.sort(function(a,b){return (b.un-a.un)||(b.l1-a.l1)||(b.s1-a.s1)||(b.s2-a.s2)||a.n.localeCompare(b.n)||a.t.localeCompare(b.t)});
+  return L;
+}
+function drawSheet(){
+  var s=UI.sheet,el=$('cpSheet');
+  if(!s){if(el)el.remove();document.body.style.overflow='';return}
+  if(!el){el=document.createElement('div');el.id='cpSheet';el.className='cp-sheet';document.body.appendChild(el);document.body.style.overflow='hidden';
+    el.innerHTML='<div class="cp-sh"><div class="cp-shr"><div class="cp-sht" id="cpShT"></div><button class="cp-ic" data-act="close" aria-label="關閉">'+IC.x+'</button></div><div class="cp-sws" id="cpSW"></div>'+
+      '<div class="cp-shr" style="margin-top:8px"><input id="cpQ" placeholder="打遊戲名字、Line、DC" autocomplete="off"></div><div class="cp-flt" id="cpFl"></div><div class="cp-ffl" id="cpFF"></div></div><div class="cp-sl"><div id="cpSL"></div></div>';
+    $('cpQ').value=UI.q;
+    $('cpQ').addEventListener('input',function(){UI.q=this.value;drawSheetList()});
+  }
+  $('cpShT').textContent='加人';
+  /* 要加進哪個部落：一排部落，點一下就換（11/16 他：選人畫面可以直接跳到其他部落接著排） */
+  $('cpSW').innerHTML=PL.sh.map(function(z){var i=shellInfo(z.t),n=z.a.length,c=n>z.size?'over':n>=z.size?'full':'';
+      return '<button data-to="'+esc(z.t)+'" class="'+(s.to===z.t?'on':'')+'">'+(i.b?'<img src="'+esc(i.b)+'" alt="">':'')+'<span>'+esc(i.n)+'</span><b class="cp-cnt '+c+'">'+Math.min(n,z.size)+'/'+z.size+(n>z.size?'+'+(n-z.size):'')+'</b></button>'}).join('')+
+    '<button data-to="rest" class="'+(s.to==='rest'?'on':'')+'"><span>休</span><b class="cp-cnt">'+(PL.rest||[]).length+'</b></button>';
+  var on=$('cpSW').querySelector('.on');if(on&&on.scrollIntoView&&!s.swd){s.swd=1;var w=$('cpSW');w.scrollLeft=on.offsetLeft-w.offsetLeft-16}
+  drawFF();
+  $('cpFl').innerHTML='<button data-f="un" class="'+(s.f==='un'?'on':'')+'">還沒排</button><button data-f="all" class="'+(s.f==='all'?'on':'')+'">全部</button>';
+  drawSheetList();
+}
+function flowsOf(t){var l=(P.a[t]||{}).l7;return l?[l[2]&&l[2][0],l[3]&&l[3][0]].filter(Boolean):[]}   /* 近 7 天最常用＋第二種（傳奇才有） */
+function drawFF(){   /* 流派篩選：名冊裡有人用的流派，照人數多到少；點了只列用這些流派的人（11/16 他：讓首領可以照空軍、陸軍分配） */
+  var C={},sel=UI.sheet.fl||{};
+  R.people.forEach(function(p){(p.a||[]).forEach(function(t){flowsOf(t).forEach(function(f){C[f]=(C[f]||0)+1})})});
+  var L=Object.keys(C).sort(function(a,b){return C[b]-C[a]||a.localeCompare(b)}),any=Object.keys(sel).length;
+  $('cpFF').innerHTML='<span class="cp-ffk">流派</span>'+L.map(function(f){return '<button data-ff="'+esc(f)+'" class="'+(sel[f]?'on':'')+'" aria-label="'+esc(f)+'">'+flowIcon(f)+'<small>'+C[f]+'</small>'+(sel[f]?'<b class="cp-ffc">✓</b>':'')+'</button>'}).join('')+(any?'<button data-ff="" class="clr">清除</button>':'');
+}
+function drawSheetList(){
+  var all=planAll(),L=pickList(),h='';
+  L.forEach(function(x){
+    var w=all[x.t],wn=w==='rest'?'休':w?shellInfo(w).n:'',here=w===UI.sheet.to;
+    h+='<button class="cp-pk" data-add="'+esc(x.t)+'"><div class="cp-who"><div class="cp-gn">'+thBadge(x.t)+esc(x.n)+'<em>'+esc(pName(x.p))+'</em></div><div class="cp-st">'+statLine(x.t)+'</div></div><div class="cp-fl">'+flPair((P.a[x.t]||{}).l7)+'</div>'+(wn?'<span class="cp-where'+(here?' here':'')+'">'+esc(wn)+'</span>':'')+'</button>';
+  });
+  $('cpSL').innerHTML=h||'<div class="cp-empty">'+(UI.sheet.f==='un'?'都排好了':'找不到')+'</div>';
+}
+function addTo(t,to){
+  var all=planAll(),from=all[t];
+  if(from===to){toast('已經在這裡');return}
+  var sh=to==='rest'?null:PL.sh.filter(function(z){return z.t===to})[0],ok=UI.sheet&&(UI.sheet.over||(UI.sheet.over={}));
+  if(sh&&sh.a.length>=sh.size&&!(ok&&ok[to])){   /* 11/16 他：滿了接著排候補要先問；同一次選人、同一個部落問一次就好 */
+    if(!confirm(shellInfo(to).n+' 已經排滿 '+sh.size+' 人，接下來會排成候補，要繼續嗎？'))return;
+    if(ok)ok[to]=1;
+  }
+  if(from==='rest')PL.rest=PL.rest.filter(function(x){return x!==t});
+  else if(from)PL.sh.forEach(function(s){if(s.t===from)s.a=s.a.filter(function(x){return x!==t})});
+  if(to==='rest')PL.rest.push(t);else PL.sh.forEach(function(s){if(s.t===to)s.a.push(t)});
+  savePlan();
+  toast((from?'從 '+(from==='rest'?'休':shellInfo(from).n)+' 移到 ':'加進 ')+(to==='rest'?'休':shellInfo(to).n));
+}
+
+/* ======== 名冊 ======== */
+function drawRoster(){
+  var na=0,nl=0;R.people.forEach(function(p){(p.a||[]).forEach(function(t){na++;if(tierZh((P.a[t]||{}).lg)==='傳一')nl++})});
+  var h='<div class="cp-tiles"><div class="cp-tile"><b>'+R.people.length+'</b><span>成員</span></div><div class="cp-tile"><b>'+na+'</b><span>帳號</span></div><div class="cp-tile"><b>'+nl+'</b><span class="cp-tlg"><img src="img/lg-chuanqi.webp" alt="傳一"><i>I</i></span></div></div>';
+  h+='<div class="cp-sbox">'+IC.search+'<input id="cpRQ" placeholder="找人：遊戲名字、Line、DC" autocomplete="off" value="'+esc(UI.rq||'')+'"></div>';
+  if(R.inbox.length){
+    h+='<div class="cp-h3 warn">表單找不到的帳號<span class="cp-num">'+R.inbox.length+'</span></div><div class="cp-card">';
+    R.inbox.forEach(function(x,i){
+      var p=R.people.filter(function(y){return y.id===x.pid})[0];
+      h+='<div class="cp-q"><div class="cp-qt"><b>'+esc(x.form)+'</b> <span>'+esc(p?pName(p):'')+'</span></div><div class="cp-qo">';
+      var sel=UI.ibSel[ibKey(x)]||{},ns=Object.keys(sel).length;
+      (x.cand||[]).forEach(function(c){var a=P.a[c[0]]||{};h+='<button data-ib="'+i+'" data-t="'+esc(c[0])+'"'+(sel[c[0]]?' class="on"':'')+'>'+(sel[c[0]]?'✓ ':'')+esc(a.n||c[1])+'<small>'+esc(c[0])+(tierZh(a.lg)?' · '+tierZh(a.lg):'')+(a.c&&a.c[1]?' · '+esc(a.c[1]):'')+'</small></button>'});
+      if((x.cand||[]).length)h+='<button data-ibgo="'+i+'" class="go"'+(ns?'':' disabled')+'>好了'+(ns?'（'+ns+' 隻）':'')+'</button>';
+      h+='</div><div class="cp-in"><input data-ibin="'+i+'" placeholder="'+((x.cand||[]).length?'或貼他的玩家標籤':'貼他的玩家標籤')+'"><button class="cp-btn sm" data-ibok="'+i+'">加</button><button class="cp-btn sm" data-ibx="'+i+'">不用了</button></div></div>';
+    });
+    h+='</div>';
+  }
+  var q=(UI.rq||'').trim().toLowerCase();
+  var L=R.people.filter(function(p){
+    if(!q)return true;
+    return (p.line+' '+(p.dc||'')+' '+(p.a||[]).map(function(t){return nameOf(t)+' '+t}).join(' ')).toLowerCase().indexOf(q)>=0;
+  }).slice().sort(function(a,b){return pName(a).localeCompare(pName(b),'zh-Hant')||a.id.localeCompare(b.id)});
+  h+='<div class="cp-h3">成員</div><div class="cp-card">';
+  L.forEach(function(p){
+    var op=UI.popen[p.id];
+    h+='<div class="cp-pp'+(op?' op':'')+'"><button class="cp-ph" data-pp="'+esc(p.id)+'"><div class="cp-who"><div class="cp-pn"><b>'+esc(pName(p)||'（沒填 Line）')+'</b>'+'</div>'+
+      '<div class="cp-al">'+(p.a||[]).map(function(t){return '<span class="cp-ac">'+(plIc((P.a[t]||{}).lg)||'<i class="cp-nol"></i>')+'<span>'+esc(nameOf(t))+'</span></span>'}).join('')+'</div></div><span class="cp-pc">'+(p.a||[]).length+IC.dn+'</span></button>';
+    if(op){
+      h+='<div class="cp-pb"><div class="cp-fr"><label>Line</label><input data-pf="line" data-pid="'+esc(p.id)+'" value="'+esc(pName(p))+'"></div><div class="cp-fr"><label>DC</label><input data-pf="dc" data-pid="'+esc(p.id)+'" value="'+esc(p.dc||'')+'"></div>';
+      (p.a||[]).forEach(function(t){h+='<div class="cp-ar"><div class="cp-who"><div class="cp-gn">'+esc(nameOf(t))+'<em>'+esc(t)+'</em></div><div class="cp-st">'+statLine(t)+'</div></div><div class="cp-fl">'+flPair((P.a[t]||{}).l7)+'</div><button class="cp-ic" data-arm="'+esc(p.id)+'" data-t="'+esc(t)+'" aria-label="拿掉">'+IC.x+'</button></div>'});
+      h+='<div class="cp-in"><input data-ain="'+esc(p.id)+'" placeholder="加帳號：打名字找，或貼標籤" autocomplete="off"><button class="cp-btn sm" data-aok="'+esc(p.id)+'">加</button></div><div id="cpPool_'+esc(p.id)+'"></div>';
+      if(!(p.a||[]).length)h+='<div style="margin-top:10px"><button class="cp-btn sm" data-pdel="'+esc(p.id)+'">刪掉這個人</button></div>';
+      h+='</div>';
+    }
+    h+='</div>';
+  });
+  if(!L.length)h+='<div class="cp-empty">找不到</div>';
+  h+='</div><div class="cp-in"><input id="cpNewP" placeholder="新成員的 Line 暱稱"><button class="cp-btn" data-act="newp">新增</button></div>';
+  return h;
+}
+function poolHits(q){   /* 名冊外、在殼子或 ETC 的人：打名字就找得到 */
+  q=q.trim().toLowerCase();if(!q)return [];
+  var L=[];
+  Object.keys(P.pool).forEach(function(t){if(OWN[t])return;var x=P.pool[t];if((x[0]+' '+t).toLowerCase().indexOf(q)>=0)L.push([t,x[0],x[1]])});
+  Object.keys(P.a).forEach(function(t){if(OWN[t])return;var a=P.a[t];if(a.n&&(a.n+' '+t).toLowerCase().indexOf(q)>=0)L.push([t,a.n,a.th])});
+  return L.sort(function(a,b){return a[1].localeCompare(b[1])||a[0].localeCompare(b[0])}).slice(0,30);
+}
+function acctAdd(pid,t){
+  var p=R.people.filter(function(x){return x.id===pid})[0];if(!p)return;
+  var o=OWN[t];
+  if(o&&o!==p){if(!confirm(nameOf(t)+' 現在在「'+pName(o)+'」底下，要改到「'+pName(p)+'」嗎？'))return;o.a=o.a.filter(function(x){return x!==t})}
+  if(p.a.indexOf(t)<0)p.a.push(t);
+  saveRoster();
+}
+
+/* ======== 殼子 ======== */
+function drawShells(){
+  var h='<div class="cp-h2">'+monZh(UI.mon)+'要用的殼子</div><div class="cp-card">';
+  var inPlan={};if(PL)PL.sh.forEach(function(s,i){inPlan[s.t]=s});
+  var list=F.filter(function(x){return x&&!x.off}).slice();
+  if(PL)PL.sh.forEach(function(s){if(!list.some(function(x){return x.t===s.t}))list.push({t:s.t})});
+  list.sort(function(a,b){var A=inPlan[a.t]?PL.sh.indexOf(inPlan[a.t]):99,B=inPlan[b.t]?PL.sh.indexOf(inPlan[b.t]):99;return A-B||(a.o==null?99:a.o)-(b.o==null?99:b.o)||String(a.t).localeCompare(String(b.t))});
+  list.forEach(function(x){
+    var i=shellInfo(x.t),s=inPlan[x.t];
+    h+='<div class="cp-sr">'+(i.b?'<img src="'+esc(i.b)+'" alt="">':'')+'<div class="cp-cn"><b>'+esc(i.n)+'</b><span>'+esc(i.lg||'')+(i.lg?' · ':'')+esc(x.t)+'</span></div>';
+    if(s){
+      h+='<select class="cp-sz" data-sz="'+esc(x.t)+'"><option'+(s.size===15?' selected':'')+'>15</option><option'+(s.size===30?' selected':'')+'>30</option></select>';
+      h+='<button class="cp-ic" data-mv="-1" data-t="'+esc(x.t)+'" aria-label="往上">'+IC.up+'</button><button class="cp-ic" data-mv="1" data-t="'+esc(x.t)+'" aria-label="往下">'+IC.dn+'</button>';
+    }
+    h+='<button class="cp-sw'+(s?' on':'')+'" data-sw="'+esc(x.t)+'" aria-label="這個月要用"></button></div>';
+  });
+  h+='</div><div class="cp-in"><input id="cpNewS" placeholder="加殼子：貼部落標籤或連結"><button class="cp-btn" data-act="news">加</button></div>';
+  if(!PL)h+='<div class="cp-empty">先到「分配」開始排 '+monZh(UI.mon)+'，這裡才能開關</div>';
+  return h;
+}
+
+/* ======== 畫面 ======== */
+function drawSave(){var e=$('cpSv');if(e){e.textContent=UI.save;e.className='cp-sv'+(UI.save==='沒存到'?' bad':'')}}
+function draw(){
+  var app=$('cpApp');
+  var h='<div class="cp-top"><div class="cp-wrap"><div class="cp-hd"><div class="cp-ttl">聯賽分配</div><div class="cp-mon"><button data-act="mprev" aria-label="上個月">‹</button><b>'+UI.mon.slice(0,4)+'/'+UI.mon.slice(5)+'</b><button data-act="mnext" aria-label="下個月">›</button></div><span class="cp-sv" id="cpSv"></span></div>'+
+    '<div class="cp-tabs"><button class="cp-tab'+(UI.tab==='plan'?' on':'')+'" data-tab="plan">分配</button><button class="cp-tab'+(UI.tab==='roster'?' on':'')+'" data-tab="roster">名冊'+(R.inbox.length?'<span class="cp-dot">'+R.inbox.length+'</span>':'')+'</button><button class="cp-tab'+(UI.tab==='shell'?' on':'')+'" data-tab="shell">殼子</button></div></div></div><div class="cp-wrap">';
+  if(UI.conflict)h+='<div class="cp-bar">'+esc(UI.conflict)+'<button data-act="reload">重新載入</button></div>';
+  h+=UI.tab==='plan'?drawPlan():UI.tab==='roster'?drawRoster():drawShells();
+  h+='</div>';
+  var y=window.scrollY;app.innerHTML=h;window.scrollTo(0,y);drawSave();
+}
+function act(e){
+  var b=e.target.closest('button,[data-det]');if(!b)return;var d=b.dataset;
+  if(d.tab){UI.tab=d.tab;UI.det='';draw();window.scrollTo(0,0);return}
+  if(d.act==='mprev'||d.act==='mnext'){UI.mon=monAdd(UI.mon,d.act==='mprev'?-1:1);UI.conflict='';boot();return}
+  if(d.act==='reload'){UI.conflict='';boot();return}
+  if(d.act==='new'){newPlan();savePlan();draw();return}
+  if(d.act==='last'){fromLast();return}
+  if(d.go){var cc=$('cpc_'+d.go.slice(1));if(cc)cc.scrollIntoView({behavior:'smooth',block:'start'});return}
+  if(d.act==='undo'){
+    if(!PL.undo||!confirm('回到帶入前的樣子？帶入之後自己加、拿掉的也會一起復原'))return;
+    PL.sh.forEach(function(s){s.a=(PL.undo.a[s.t]||[]).slice()});PL.rest=PL.undo.rest.slice();delete PL.undo;
+    savePlan();draw();toast('已取消帶入');return;
+  }
+  if(d.act==='share'){shareOpen(null);return}
+  if(d.copy!=null){shareOpen(PL.sh[+d.copy].t);return}
+  if(d.act==='shclose'){UI.share=null;drawShare();return}
+  if(d.act==='shfl'){UI.share.fl=!UI.share.fl;shareGen();return}
+  if(d.act==='shall'){shareFiles(UI.share.imgs.filter(Boolean));return}
+  if(d.shone!=null){var im=UI.share.imgs[+d.shone];if(im)shareFiles([im]);return}
+  if(d.act==='shtxt'){copy(linkText());return}
+  if(d.pick){UI.sheet={to:d.pick,f:'un'};UI.q='';drawSheet();setTimeout(function(){var q=$('cpQ');if(q&&matchMedia('(hover:hover)').matches)q.focus()},50);return}
+  if(d.act==='close'){UI.sheet=null;drawSheet();draw();return}
+  if(d.ff!=null){var fl=UI.sheet.fl||(UI.sheet.fl={});if(!d.ff)UI.sheet.fl={};else if(fl[d.ff])delete fl[d.ff];else fl[d.ff]=1;drawSheet();return}
+  if(d.f){UI.sheet.f=d.f;drawSheet();return}
+  if(d.add){addTo(d.add,UI.sheet.to);drawSheet();return}
+  if(d.to&&UI.sheet){UI.sheet.to=d.to;drawSheet();return}
+  if(d.rm){
+    var t=d.t;if(d.rm==='rest')PL.rest=PL.rest.filter(function(x){return x!==t});else PL.sh.forEach(function(s){if(s.t===d.rm)s.a=s.a.filter(function(x){return x!==t})});
+    savePlan();draw();return;
+  }
+  if(d.det!=null&&b.tagName!=='BUTTON'){UI.det=UI.det===d.det?'':d.det;draw();return}
+  /* 名冊 */
+  if(d.pp){UI.popen[d.pp]=!UI.popen[d.pp];draw();return}
+  if(d.ib!=null){var x=R.inbox[+d.ib],k=ibKey(x),m=UI.ibSel[k]||(UI.ibSel[k]={});if(m[d.t])delete m[d.t];else m[d.t]=1;draw();return}
+  if(d.ibgo!=null){var xg=R.inbox[+d.ibgo],kg=ibKey(xg),mg=UI.ibSel[kg]||{};Object.keys(mg).forEach(function(t){acctAdd(xg.pid,t)});delete UI.ibSel[kg];R.inbox.splice(+d.ibgo,1);saveRoster();draw();return}
+  if(d.ibx!=null){R.inbox.splice(+d.ibx,1);saveRoster();draw();return}
+  if(d.ibok!=null){var inp=document.querySelector('[data-ibin="'+d.ibok+'"]'),tg=cpTag(inp&&inp.value);if(!tg){toast('標籤不對');return}var y=R.inbox[+d.ibok];acctAdd(y.pid,tg);R.inbox.splice(+d.ibok,1);saveRoster();draw();return}
+  if(d.arm){var p=R.people.filter(function(z){return z.id===d.arm})[0];if(p&&confirm('把 '+nameOf(d.t)+' 從 '+pName(p)+' 拿掉？')){p.a=p.a.filter(function(z){return z!==d.t});saveRoster();draw()}return}
+  if(d.aok){var ai=document.querySelector('[data-ain="'+d.aok+'"]'),t2=cpTag(ai&&ai.value);if(!t2){toast('打名字從下面選，或貼標籤');return}acctAdd(d.aok,t2);draw();return}
+  if(d.padd){acctAdd(d.pid,d.padd);draw();return}
+  if(d.pdel){R.people=R.people.filter(function(z){return z.id!==d.pdel});saveRoster();draw();return}
+  if(d.act==='newp'){var v=($('cpNewP').value||'').trim();if(!v)return;var id='p'+Date.now().toString(36);R.people.push({id:id,line:v,dc:'',a:[]});UI.popen[id]=true;UI.rq='';saveRoster();draw();return}
+  /* 殼子 */
+  if(d.sw){
+    if(!PL){toast('先到分配開始排');return}
+    var s=PL.sh.filter(function(z){return z.t===d.sw})[0];
+    if(s){if(s.a.length&&!confirm(shellInfo(s.t).n+' 已經排了 '+s.a.length+' 人，關掉會把這些人放回還沒排，確定？'))return;PL.sh=PL.sh.filter(function(z){return z!==s})}
+    else PL.sh.push({t:d.sw,size:lastSize(d.sw),a:[]});
+    savePlan();draw();return;
+  }
+  if(d.mv){var i=PL.sh.findIndex(function(z){return z.t===d.t}),j=i+(+d.mv);if(i<0||j<0||j>=PL.sh.length)return;var tmp=PL.sh[i];PL.sh[i]=PL.sh[j];PL.sh[j]=tmp;savePlan();draw();return}
+  if(d.act==='news'){
+    var tg2=cpTag($('cpNewS').value);if(!tg2){toast('標籤不對');return}
+    if(F.some(function(z){return z.t===tg2&&!z.off})){toast('已經有了');return}
+    var f=F.filter(function(z){return z.t===tg2})[0];
+    if(f){f.off=false;f.show=true}else{f={t:tg2,n:tg2,o:F.length,at:new Date().toISOString(),off:false,show:true};F.push(f)}
+    favPut(f).then(function(ok){if(!ok)toast('沒存到')});
+    fetch('https://api.clashk.ing/v2/clan/'+encodeURIComponent(tg2)+'/cached').then(function(r){return r.ok?r.json():null}).then(function(c){
+      if(c&&c.name){f.n=c.name;f.b=(c.badgeUrls||{}).small||'';favPut(f);draw()}}).catch(function(){});
+    if(PL&&!PL.sh.some(function(z){return z.t===tg2})){PL.sh.push({t:tg2,size:lastSize(tg2),a:[]});savePlan()}
+    draw();return;
+  }
+}
+function onChange(e){
+  var el=e.target,d=el.dataset;
+  if(d.pf){var p=R.people.filter(function(z){return z.id===d.pid})[0];if(p){p[d.pf]=el.value.trim();saveRoster()}return}
+  if(d.sz){var s=PL.sh.filter(function(z){return z.t===d.sz})[0];if(s){s.size=+el.value;savePlan();draw()}return}
+}
+function onInput(e){
+  var el=e.target,d=el.dataset;
+  if(el.id==='cpRQ'){UI.rq=el.value;var pos=el.selectionStart;draw();var n=$('cpRQ');n.focus();try{n.setSelectionRange(pos,pos)}catch(x){}return}
+  if(d.ain){var box=$('cpPool_'+d.ain);if(!box)return;var L=cpTag(el.value)&&el.value.length>=6?[]:poolHits(el.value);
+    box.innerHTML=L.length?'<div class="cp-pool">'+L.map(function(x){return '<button data-padd="'+esc(x[0])+'" data-pid="'+esc(d.ain)+'">'+esc(x[1])+'<small>'+esc(x[0])+'</small></button>'}).join('')+'</div>':''}
+}
+
+/* ======== 開始 ======== */
+function boot(){
+  $('cpApp').innerHTML='<div class="cp-wrap"><div class="cp-empty" style="padding-top:30vh;text-align:center">讀取中…</div></div>';
+  loadAll().then(function(){NEED.at=P.at||'';draw();needCheck()}).catch(function(){$('cpApp').innerHTML='<div class="cp-wrap"><div class="cp-bar" style="margin-top:30vh">讀不到資料<button data-act="reload">再試一次</button></div></div>'});
+}
+function gate(){
+  var ok=false;try{ok=localStorage.getItem('cpl_pass')===CP_PASS}catch(e){}
+  if(ok||CP_PV&&CP_PV.nogate){boot();return}
+  $('cpApp').innerHTML='<div class="cp-gate"><h1>聯賽分配</h1><input id="cpPw" type="password" inputmode="numeric" placeholder="密碼" autocomplete="off"><p id="cpPwE"></p></div>';
+  $('cpPw').addEventListener('keydown',function(e){
+    if(e.key!=='Enter')return;
+    if(this.value===CP_PASS){try{localStorage.setItem('cpl_pass',CP_PASS)}catch(x){}boot()}else $('cpPwE').textContent='密碼不對';
+  });
+  $('cpPw').addEventListener('input',function(){if(this.value===CP_PASS){try{localStorage.setItem('cpl_pass',CP_PASS)}catch(x){}boot()}});
+}
+UI.mon=monDef();
+document.addEventListener('click',act);
+document.addEventListener('change',onChange);
+document.addEventListener('input',onInput);
+gate();
+</script>
+</body>
+</html>
