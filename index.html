@@ -205,6 +205,10 @@ input:focus{border-color:var(--line2)}
 .cp-h3 .cp-num{font-size:14px}
 .cp-h3.warn{color:var(--warm)}
 .cp-h3.warn .cp-num{color:var(--warm)}
+.cp-jh{width:100%;text-align:left}
+.cp-jh svg{width:16px;height:16px;color:var(--tx3)}
+.cp-jt{display:flex;align-items:center;gap:6px}
+.cp-jt img{width:18px;height:18px;object-fit:contain;margin-left:4px}
 .cp-pp.op{background:rgba(255,255,255,.025)}
 .cp-ph{align-items:flex-start;padding:12px 12px 12px 14px}
 .cp-pn{display:flex;align-items:baseline;gap:8px;min-width:0}
@@ -725,6 +729,20 @@ function drawRoster(){
     });
     h+='</div>';
   }
+  /* 11 月聯賽有打、名冊沒有（11/16 他：參考統計頁 11 月聯賽的名單抓進來，他來填 Line 名字）：R.join＝[{t, n, c＝在哪個殼子打}]
+     填的 Line 名字跟名冊裡的人一樣 → 併進那個人；沒有 → 新增一個人。長名單預設收起來 */
+  var J=R.join||[];
+  if(J.length){
+    var jo=UI.jopen;
+    h+='<button class="cp-h3 warn cp-jh" data-act="jtog">'+monZh(J[0].m||'2026-11')+'聯賽有打、名冊沒有<span class="cp-num">'+J.length+'</span><span class="cp-sp"></span>'+IC.dn+'</button>';
+    if(jo){
+      h+='<datalist id="cpLines">'+R.people.map(function(p){return '<option value="'+esc(pName(p))+'">'}).join('')+'</datalist><div class="cp-card">';
+      J.forEach(function(x,i){var si=shellInfo(x.c);
+        h+='<div class="cp-q"><div class="cp-qt cp-jt"><b>'+esc(x.n)+'</b>'+(si.b?'<img src="'+esc(si.b)+'" alt="">':'')+'<span>'+esc(si.n)+'</span></div>'+
+          '<div class="cp-in"><input data-jin="'+i+'" list="cpLines" placeholder="Line 名字" autocomplete="off"><button class="cp-btn sm" data-jok="'+i+'">加</button><button class="cp-btn sm" data-jx="'+i+'">不用了</button></div></div>'});
+      h+='</div>';
+    }
+  }
   var q=(UI.rq||'').trim().toLowerCase();
   var L=R.people.filter(function(p){
     if(!q)return true;
@@ -831,6 +849,16 @@ function act(e){
   if(d.ib!=null){var x=R.inbox[+d.ib],k=ibKey(x),m=UI.ibSel[k]||(UI.ibSel[k]={});if(m[d.t])delete m[d.t];else m[d.t]=1;draw();return}
   if(d.ibgo!=null){var xg=R.inbox[+d.ibgo],kg=ibKey(xg),mg=UI.ibSel[kg]||{};Object.keys(mg).forEach(function(t){acctAdd(xg.pid,t)});delete UI.ibSel[kg];R.inbox.splice(+d.ibgo,1);saveRoster();draw();return}
   if(d.ibx!=null){R.inbox.splice(+d.ibx,1);saveRoster();draw();return}
+  if(d.act==='jtog'){UI.jopen=!UI.jopen;draw();return}
+  if(d.jok!=null){
+    var ji=document.querySelector('[data-jin="'+d.jok+'"]'),jv=(ji&&ji.value||'').trim(),jx=R.join[+d.jok];if(!jx)return;
+    if(!jv){toast('先填 Line 名字');return}
+    var key=jv.toLowerCase(),jp=R.people.filter(function(p){return pName(p).trim().toLowerCase()===key||String(p.line||'').trim().toLowerCase()===key})[0];
+    if(jp){acctAdd(jp.id,jx.t);toast('併進 '+pName(jp))}
+    else{R.people.push({id:'p'+Date.now().toString(36),line:jv,dc:'',a:[jx.t]});toast('新增 '+jv)}
+    R.join.splice(+d.jok,1);saveRoster();draw();return;
+  }
+  if(d.jx!=null){R.join.splice(+d.jx,1);saveRoster();draw();return}
   if(d.ibok!=null){var inp=document.querySelector('[data-ibin="'+d.ibok+'"]'),tg=cpTag(inp&&inp.value);if(!tg){toast('標籤不對');return}var y=R.inbox[+d.ibok];acctAdd(y.pid,tg);R.inbox.splice(+d.ibok,1);saveRoster();draw();return}
   if(d.arm){var p=R.people.filter(function(z){return z.id===d.arm})[0];if(p&&confirm('把 '+nameOf(d.t)+' 從 '+pName(p)+' 拿掉？')){p.a=p.a.filter(function(z){return z!==d.t});saveRoster();draw()}return}
   if(d.aok){var ai=document.querySelector('[data-ain="'+d.aok+'"]'),t2=cpTag(ai&&ai.value);if(!t2){toast('打名字從下面選，或貼標籤');return}acctAdd(d.aok,t2);draw();return}
