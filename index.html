@@ -334,7 +334,7 @@ function lgZh(n){   /* 聯賽難度：Titan League II → 泰坦二；Legend Lea
   n=String(n||'');if(/^Legend League/.test(n))return '傳說';
   var m=/^(\w+) League (I{1,3})$/.exec(n);return m&&LG_W[m[1]]?LG_W[m[1]]+LG_N[m[2]]:'';
 }
-function tierZh(n){return n==='Legend I'?'傳一':n==='Legend II'?'傳二':n==='Legend III'?'傳三':''}
+function tierZh(n){n=String(n||'').replace(/^Legend League /,'Legend ');return n==='Legend I'?'傳一':n==='Legend II'?'傳二':n==='Legend III'?'傳三':''}
 function nameOf(t){var a=P.a[t];return a&&a.n?a.n:(P.pool[t]?P.pool[t][0]:t)}
 function ownerOf(t){return OWN[t]||null}
 function ibKey(x){return x.pid+'|'+x.form}   /* 待確認那一列勾了哪幾隻（只在畫面上，按好了才存） */
@@ -353,7 +353,7 @@ var IC={
 /* ======== 流派頭像（統計頁同一套，注入的） ======== */
 var AUTO='自動防守';function colorOf(n){return flowColor(n)}
 const FLOW_COLORS={'鉛筆':'#e0a82e','藍胖':'#5aa9f0','雙龍':'#e2603f','龍騎':'#57c08a','超雪':'#e88ab0','其他':'#4fc4c9',
-  '火球馬雲':'#c9a06a','火球阿婆':'#8a93c9','火球超女巫':'#a8c256','狗球':'#c77d8f','超弓':'#5f9ea0','火球小拳石':'#b47ce8','超龍':'#f08c5a',
+  '火球馬雲':'#c9a06a','火球阿婆':'#8a93c9','火球超女巫':'#a8c256','狗球':'#c77d8f','超弓':'#5f9ea0','火球小拳石':'#b47ce8','超龍':'#f08c5a','雷龍':'#d8d27a','氣球小隊':'#d4d9e8',
   '積木':'#7e8aa0','火球廢女巫':'#7e8aa0'};
 const FLOW_SPARE=['#b47ce8','#f08c5a','#6fd0a8','#d8d27a'];
 function flowColor(n){
@@ -364,8 +364,8 @@ function flowColor(n){
   return FLOW_SPARE[h%FLOW_SPARE.length];
 }
 var FLOW_ICON={'鉛筆':'thrower','藍胖':'super-bowler','雙龍':['dragon','dragon-rider'],'龍騎':'dragon-rider',
-  '火球馬雲':'super-minion','火球超女巫':'super-witch','火球阿婆':'ruin-witch','狗球':'balloon','超雪':'super-yeti','超弓':'super-archer','火球小拳石':'xiaoquanshi','超龍':'gold-dragon',
-  '積木':'jimu','雷龍':'electro-dragon','大金龍':'gold-dragon'};
+  '火球馬雲':'super-minion','火球超女巫':'super-witch','火球阿婆':'ruin-witch','狗球':'balloon','超雪':'super-yeti','超弓':'super-archer','火球小拳石':'xiaoquanshi','超龍':'gold-dragon','雷龍':'electro-dragon','氣球小隊':'sq/199',
+  '積木':'jimu','大金龍':'gold-dragon'};
 var FLOW_FIREBALL={'火球馬雲':1,'火球超女巫':1,'火球阿婆':1,'火球小拳石':1};
 var VAR_INFO={'背包鉛筆':['鉛筆','beibao'],'發牌鉛筆':['鉛筆','fapai'],'背包雙龍':['雙龍','beibao'],'發牌雙龍':['雙龍','fapai'],
   '擊暈器藍胖':['藍胖','jiyunqi',1],'發牌藍胖':['藍胖','fapai',1],'牙心藍胖':['藍胖','dianya',1],
@@ -396,14 +396,27 @@ function flIc(x,sm){if(!x||!x[0])return '';var h=flowIcon(x[0],x[1]||'');return 
 function flPair(l){return l?flIc(l[2])+flIc(l[3],1):''}
 
 /* ======== 每個帳號的一行數字（首領 11/15：在傳一看傳一，不在看過去聯賽） ======== */
-/* 三星率紅綠分段的切點（11/16 他選甲；切點是我訂的，要改改這裡）：傳一近 7 天、聯賽每一刀 */
-var RATE_CUT={l:[65,50],c:[90,70]};
+/* 三星率紅綠分段（11/16 他選甲紅綠；11/22 改成跟全組比，他選乙：「會自動更新 不然每次還要調整」）：
+   名冊所有帳號照高到低排，前三分之一綠、後三分之一紅（同分一起算）。傳一比近 7 天（8 刀以上才算進來），聯賽比最近一次每一刀（3 刀以上）。
+   每次 P 換了（Mac mini 寫新數字）自己重算；夠比的少於 6 個或切點撞在一起就不上色 */
+var RATE_MIN={l:8,c:3},RATE_CUT_P=null,RATE_CUT={};
+function rateCut(k){
+  if(RATE_CUT_P!==P){
+    RATE_CUT_P=P;var L={l:[],c:[]};
+    Object.keys(P.a||{}).forEach(function(t){var a=P.a[t]||{};
+      if(tierZh(a.lg)==='傳一'&&a.l7&&a.l7[0]>=RATE_MIN.l)L.l.push(100*a.l7[1]/a.l7[0]);
+      var c=(a.cw||[])[0];if(c&&c[6]>=RATE_MIN.c)L.c.push(100*c[8]/c[6])});
+    ['l','c'].forEach(function(x){var r=L[x].map(Math.round).sort(function(p,q){return q-p}),n=r.length,m=Math.ceil(n/3);
+      RATE_CUT[x]=n>=6&&r[m-1]>r[n-m]?[r[m-1],r[n-m]]:null});
+  }
+  return RATE_CUT[k];
+}
 function rateOf(t){   /* 拿來比的三星率：傳一＝近 7 天傳奇進攻；其他＝上一次聯賽每一刀（他 11/16：少打刀是換候補，不算問題，所以不看總星數） */
   var a=P.a[t]||{};
   if(tierZh(a.lg)==='傳一')return a.l7&&a.l7[0]?['l',Math.round(100*a.l7[1]/a.l7[0])]:null;
   var c=(a.cw||[])[0];return c&&c[6]?['c',Math.round(100*c[8]/c[6])]:null;
 }
-function rateCls(r,k){var c=RATE_CUT[k];return r>=c[0]?' cp-r hi':r<c[1]?' cp-r lo':''}
+function rateCls(r,k){var c=rateCut(k);return !c?'':r>=c[0]?' cp-r hi':r<=c[1]?' cp-r lo':''}
 function rateHtml(r,k,big){return big?'<b class="cp-big'+rateCls(r,k)+'">'+r+'%</b>':'<span class="cp-num'+rateCls(r,k)+'">'+r+'%</span>'}
 function statLine(t){   /* 11/16：流派頭像搬到最右邊（cp-fl），這行只放段位和數字 */
   var a=P.a[t];if(!a)return '<span class="cp-k">抓資料中…</span>';
