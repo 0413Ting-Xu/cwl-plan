@@ -202,6 +202,63 @@ input:focus{border-color:var(--line2)}
 .cp-sbox{position:relative;margin:12px 0 4px}
 .cp-sbox svg{position:absolute;left:12px;top:50%;width:17px;height:17px;margin-top:-8.5px;color:var(--tx3);pointer-events:none}
 .cp-sbox input{padding-left:38px;border-radius:12px;background:#151a27}
+/* 名冊排序、篩選（11/24 他：「按照排位賽從高排到低」；第二版他：「這個排版方式很醜 美術總監處理一下」）
+   一塊工具列：每行左邊一個小標（排序／段位／流派）對齊；排序是一條連在一起的切換軌、段位三格連在一起，每顆一樣高 */
+.cp-rbx{margin:12px 0 0;padding:11px 10px;border-radius:14px;background:linear-gradient(180deg,#181d2b,#131722);border:1px solid var(--line);display:grid;gap:9px}
+.cp-rbr{display:flex;align-items:flex-start;gap:8px;min-width:0}
+.cp-rbk{flex:none;width:26px;line-height:36px;font-size:12px;color:var(--tx3);letter-spacing:.5px}
+.cp-seg{display:flex;padding:3px;border-radius:10px;background:#0d1018;border:1px solid var(--line);flex:none}
+.cp-seg.full{flex:0 1 440px;min-width:0}
+.cp-seg button{flex:1 1 auto;height:28px;padding:0 7px;border-radius:7px;font-size:13px;color:var(--tx3);white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+.cp-seg.full button{padding:0 4px}
+.cp-seg button.on{color:#fff;background:#323c5a;box-shadow:0 1px 3px rgba(0,0,0,.45)}
+.cp-seg button small{font:400 11px 'Russo One',Rubik,sans-serif;color:var(--tx4,#5d6680)}
+.cp-seg button.on small{color:#aab4ff}
+.cp-chs{flex:1;display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;min-width:0;padding-top:1px}
+/* 流派：方形小磚、人數掛右上角（比較頁 11/24 第二版：一行放得下、不用左右滑） */
+.cp-rfb{position:relative;flex:none;width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;border-radius:11px;background:#0d1018;border:1px solid var(--line)}
+.cp-rfb .ficw{--ic:28px}
+.cp-rfb small{position:absolute;top:-6px;right:-7px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#262c3d;border:1px solid var(--line2);font:400 10.5px/15px 'Russo One',Rubik,sans-serif;color:var(--tx2);text-align:center}
+.cp-rfb.on{background:#262e52;border-color:#7d8cf0;box-shadow:0 0 0 1px rgba(125,140,240,.3)}
+.cp-rfb.on small{background:#7d8cf0;border-color:#7d8cf0;color:#11141d}
+.cp-rbx.sh{margin:8px 0 0}
+/* 載入畫面（UX 11/25）。淡入只動透明度（頂端列是 sticky、分享圖是 fixed，不能用 transform） */
+.cp-ld{padding-top:12vh}
+.cp-ldl{display:block;width:64px;height:64px;margin:0 auto 28px;animation:cpPulse 1.4s ease-in-out infinite}
+@keyframes cpPulse{0%,100%{opacity:.4}50%{opacity:1}}
+.cp-sk{background:linear-gradient(180deg,#181d2b,#141824);border:1px solid var(--line);border-radius:14px;padding:14px 14px 6px;margin:0 0 12px}
+.cp-skh{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.cp-skh b{width:34px;height:34px;border-radius:9px;flex:none}
+.cp-skh i{flex:none;width:48%;height:15px;margin:0!important}
+.cp-sk i,.cp-skh b{display:block;background:linear-gradient(90deg,#1d2331 0%,#2b3347 45%,#1d2331 90%);background-size:220% 100%;animation:cpShim 1.3s linear infinite}
+.cp-sk>i{height:11px;border-radius:6px;margin:0 0 12px;width:78%}
+.cp-sk>i:nth-of-type(2n){width:62%}.cp-sk>i:nth-of-type(3n){width:70%}
+@keyframes cpShim{0%{background-position:110% 0}100%{background-position:-110% 0}}
+.cp-fi{animation:cpFi .35s ease-out}
+@keyframes cpFi{from{opacity:0}to{opacity:1}}
+/* 按鈕手感（UX 11/25） */
+button{transition:transform .12s ease-out}
+button:active{transform:scale(.95)}
+.cp-pk:active,.cp-ph:active,.cp-jh:active,.cp-ovr:active,.cp-tab:active,.cp-row:active{transform:scale(.985)}
+[data-sk]{position:relative}
+[data-sk]>button{position:relative;z-index:1}
+[data-sk].sl>button.on{background:transparent!important;box-shadow:none!important}
+.cp-ind{position:absolute;left:0;z-index:0;pointer-events:none;transition:transform .26s cubic-bezier(.3,.8,.3,1),width .26s cubic-bezier(.3,.8,.3,1)}
+.cp-seg>.cp-ind{top:3px;bottom:3px;border-radius:7px;background:#323c5a;box-shadow:0 1px 3px rgba(0,0,0,.45)}
+.cp-tabs>.cp-ind{top:0;bottom:8px;border-radius:8px;background:var(--s2)}
+/* 加人回饋（UX 11/25） */
+.cp-cnt.cp-bump,.cp-cnt.cp-fullfx{display:inline-block;animation:cpBump .42s cubic-bezier(.3,1.7,.5,1)}
+.cp-cnt.cp-fullfx{animation:cpBump .42s cubic-bezier(.3,1.7,.5,1),cpGlow 1s ease-out}
+@keyframes cpBump{0%{transform:scale(1)}40%{transform:scale(1.3)}100%{transform:scale(1)}}
+@keyframes cpGlow{0%,100%{text-shadow:0 0 0 rgba(111,191,139,0)}30%{text-shadow:0 0 12px rgba(111,191,139,.95)}}
+#cpSW button.cp-fullbtn{animation:cpRing 1s ease-out}
+@keyframes cpRing{0%{box-shadow:inset 0 0 0 2px rgba(111,191,139,.95);background:rgba(111,191,139,.2)}100%{box-shadow:inset 0 0 0 2px rgba(111,191,139,0)}}
+@media (prefers-reduced-motion:reduce){.cp-cnt.cp-bump,.cp-cnt.cp-fullfx,#cpSW button.cp-fullbtn,.cp-ldl,.cp-sk i,.cp-skh b{animation:none}}
+.cp-h3 .cp-rbc{margin-left:auto;font-size:13px;font-weight:400;color:var(--tx3);padding:2px 0}
+.cp-ac.dim{opacity:.35}
+.cp-ac b.cp-av{font-family:'Russo One',Rubik,sans-serif;font-weight:400;font-size:12.5px;color:var(--tx2);white-space:nowrap}
+.cp-ac b.cp-av.hi{color:var(--good)}
+.cp-ac b.cp-av.lo{color:var(--loss)}
 .cp-h3{display:flex;align-items:center;gap:8px;margin:18px 2px 8px;font-size:14px;font-weight:600;color:var(--tx2)}
 .cp-h3 .cp-num{font-size:14px}
 .cp-h3.warn{color:var(--warm)}
@@ -233,8 +290,13 @@ input:focus{border-color:var(--line2)}
 .cp-pool button:first-child{border-top:0}
 .cp-pool small{color:var(--tx3);margin-left:auto}
 /* 殼子 */
-.cp-sr{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid rgba(51,60,82,.55)}
+.cp-sr{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid rgba(51,60,82,.55)}
 .cp-sr:first-child{border-top:0}
+.cp-srx{display:flex;align-items:center;gap:8px;order:2}
+.cp-sr .cp-sw{order:3}
+.cp-srx .cp-rbk{width:auto;line-height:normal}
+.cp-srx .cp-seg button{padding:0 14px}
+@media (max-width:520px){.cp-srx{order:4;flex-basis:100%;padding-left:40px}}
 .cp-sr img{width:30px;height:30px;flex:none}
 .cp-sw{width:44px;height:26px;border-radius:13px;background:var(--s3);position:relative;flex:none;transition:background .15s}
 .cp-sw::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--tx3);transition:transform .15s,background .15s}
@@ -289,6 +351,7 @@ input:focus{border-color:var(--line2)}
 .cp-cw{display:flex;flex-direction:column;gap:2px}
 .cp-cwr{display:grid;grid-template-columns:38px 70px minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:5px 8px;border-radius:8px;background:rgba(15,19,32,.55);font-size:13px}
 .cp-cwr .m{color:var(--tx3)}
+@media (max-width:520px){.cp-lm{display:none}.cp-cwr{grid-template-columns:38px 70px minmax(0,1fr) auto}.cp-cwr .cn{display:none}.cp-cwr .s{justify-self:end;white-space:nowrap}}
 .cp-cwr .cn{color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cp-cwr .s{color:var(--tx2);font-variant-numeric:tabular-nums}
 .cp-cwr .r{text-align:right;color:var(--tx2);white-space:nowrap;display:flex;align-items:center;justify-content:flex-end;gap:4px}
@@ -299,7 +362,7 @@ input:focus{border-color:var(--line2)}
 <div id="cpApp"></div>
 <script>
 /* ======== 設定 ======== */
-var CP_VERSION='2026-11-15a';
+var CP_VERSION='2026-11-25a';
 var SUPA_URL='https://evmfmwpsgnccnsaxlafz.supabase.co', SUPA_KEY='sb_publishable_y1ObqeSRZ4AD8pMSeZ1zsQ_nvtd_aFQ';
 var CP_G='legend1';
 var CP_PASS='2330';   /* 進這頁的密碼（他決定） */
@@ -384,6 +447,27 @@ function flowIcon(fl,v){
   else if(v&&VAR_INFO[v]&&VAR_INFO[v][0]===fl)h+='<img class="ffb'+(Array.isArray(k)?'':' ffv')+(VAR_INFO[v][2]?' ffl':'')+'" src="img/'+VAR_INFO[v][1]+'.webp" alt="">';   /* 變體的角標（2026-10-17）；一張頭像的放大一點（他 10/17 說太小），雙龍兩張並排的照舊；藍胖掛左下 */
   return '<span class="ficw">'+h+'</span>';
 }
+var OTHER_NOTE_ICON=[[/傳送.*(金龍|超龍)|(金龍|超龍).*傳送/,'gold-dragon','chuansong'],[/金龍|超龍/,'gold-dragon'],['雷龍','electro-dragon'],['積木','jimu'],
+  [/超雪.*(藍胖|超藍)|(藍胖|超藍).*超雪/,['super-yeti','super-bowler']],
+  ['超豬','chaozhu'],[/鏡像.*火鍋|火鍋.*鏡像/,'huoguo','jingxiang'],[/野豬.*礦工|礦工.*野豬/,['yezhu','kuanggong']],
+  [/傳送.*狗球|狗球.*傳送/,'balloon','chuansong'],
+  ['純飛龍','dragon'],['火球藍胖','super-bowler','fireball','ffl'],['斷線','duanxian'],['泰坦','taitan']];
+function ckSqTab(){return {195:'野蠻弓箭小隊',196:'巨人法師小隊',197:'炸彈人小隊',198:'亡靈小隊',199:'氣球小隊',200:'石巫小隊',201:'野豬小隊',202:'礦工小隊',203:'天使小隊',204:'太皮小隊',205:'雙龍小隊',206:'飛龍寶寶小隊'}}
+function rowIcon(r){
+  if(!r||(r.flow0||r.flow)!=='其他')return null;   /* flow0：統計頁「算成流派」的場原本是其他（10/28） */
+  const n=String(r.note||'').replace(/[\u4e00-\u9fff]/g,c=>S2T[c]||c);
+  /* 軍隊資料庫的別名（10/27）：整個備註剛好是別名（例：棘木女武）就照它併進去的名字找頭像；找不到再照原本的備註 */
+  const A=noteAliasMap();let k=n.trim();for(let i=0;i<5&&A[k]&&A[k]!==k;i++)k=A[k];
+  /* 純小隊（11/17）：補充寫著小隊的名字 → 那張小隊圖（外圈照舊是其他的顏色）。手填「雙龍小隊」也一樣 */
+  const SQ=ckSqTab(),sq=Object.keys(SQ).find(i=>k.indexOf(SQ[i])>=0||n.indexOf(SQ[i])>=0);
+  if(sq)return '<span class="ficw"><span class="fic" style="border:2px solid '+colorOf('其他')+'"><img src="img/sq/'+sq+'.webp" alt=""></span></span>';
+  const hit=t=>OTHER_NOTE_ICON.find(x=>x[0] instanceof RegExp?x[0].test(t):t.indexOf(x[0])>=0);
+  const m=(k!==n.trim()&&hit(k))||hit(n);
+  if(!m){const f=noteFlowMap()[k]||noteFlowMap()[n.trim()];return f&&f!=='其他'?flowIcon(f):null}   /* 沒頭像、但軍隊資料庫把它算成某個流派 → 那個流派的頭像（10/28） */
+  const ring=' style="border:2px solid '+colorOf('其他')+'"';
+  return '<span class="ficw">'+(Array.isArray(m[1])?m[1].map(x=>'<span class="fic sd"'+ring+'><img src="img/'+x+'.webp" alt=""></span>').join(''):
+    '<span class="fic"'+ring+'><img src="img/'+m[1]+'.webp" alt=""></span>')+(m[2]?'<img class="ffb '+(m[3]||'ffv')+'" src="img/'+m[2]+'.webp" alt="">':'')+'</span>';   /* m[2]＝右下角的角標（10/20 鏡像火鍋：火鍋＋鏡像角標，跟變體同一種）；m[3]＝角標樣式（10/28 火球藍胖：ffl＝火球大小、掛左下） */
+}
 /* 聯賽（部落）：統計頁 CWL_WLN 那三張圖＋聯賽區的字色；大師以下沒有圖 */
 var CP_EMB={'傳說':['cwl-chuanshuo','#cfb4ff'],'泰坦':['cwl-taitan','#f3d27a'],'冠軍':['cwl-guanjun','#ffb27c'],'大師':['','#9fb6d6']};
 function lgCol(z){return CP_EMB[String(z||'').slice(0,2)]||['','']}
@@ -392,7 +476,7 @@ function lgTag(z){if(!z)return '';var e=lgCol(z);return '<span class="cp-lg"'+(e
 var CP_LGI=[[/^Legend /,'lg-chuanqi'],[/^Electro /,'lg-leilong'],[/^Dragon /,'lg-feilong'],[/^Titan /,'lg-taitan']];
 function plIc(lg){   /* 小圖不掛角標（11/16 他：圖太小掛角標很醜）；傳一二三只在名冊那格用大圖＋羅馬數字 */
   for(var i=0;i<CP_LGI.length;i++)if(CP_LGI[i][0].test(lg||''))return '<img class="cp-pli" src="img/'+CP_LGI[i][1]+'.webp" alt="">';return ''}
-function flIc(x,sm){if(!x||!x[0])return '';var h=flowIcon(x[0],x[1]||'');return sm?h.replace('class="ficw"','class="ficw sm"'):h}
+function flIc(x,sm){if(!x||!x[0])return '';var h=flIcN(x[0],x[1]);return sm?h.replace('class="ficw"','class="ficw sm"'):h}
 function flPair(l){return l?flIc(l[2])+flIc(l[3],1):''}
 
 /* ======== 每個帳號的一行數字（首領 11/15：在傳一看傳一，不在看過去聯賽） ======== */
@@ -418,6 +502,10 @@ function rateOf(t){   /* 拿來比的三星率：傳一＝近 7 天傳奇進攻�
 }
 function rateCls(r,k){var c=rateCut(k);return !c?'':r>=c[0]?' cp-r hi':r<=c[1]?' cp-r lo':''}
 function rateHtml(r,k,big){return big?'<b class="cp-big'+rateCls(r,k)+'">'+r+'%</b>':'<span class="cp-num'+rateCls(r,k)+'">'+r+'%</span>'}
+/* 沒在傳一那行（UX 11/24）：手機上「傳二 · 11 月 泰坦二 7 刀 三星 6 刀」最後被切掉 → 最近一次聯賽（全名冊最新的那個月）不寫月份，比較舊的才寫 */
+var CW_LAST_P=null,CW_LAST='';
+function cwLast(){if(CW_LAST_P!==P){CW_LAST_P=P;CW_LAST='';Object.keys(P.a||{}).forEach(function(t){var c=((P.a[t]||{}).cw||[])[0];if(c&&c[0]>CW_LAST)CW_LAST=c[0]})}return CW_LAST}
+function cwMon(m){return '<span class="cp-k'+(m===cwLast()?' cp-lm':'')+'">'+monZh(m)+'</span>'}   /* 11/25 他問電腦是不是本來沒問題 → 只有手機（520 以下）藏起來 */
 function statLine(t){   /* 11/16：流派頭像搬到最右邊（cp-fl），這行只放段位和數字 */
   var a=P.a[t];if(!a)return '<span class="cp-k">抓資料中…</span>';
   if(a.x)return '<span>標籤查不到</span>';
@@ -429,8 +517,8 @@ function statLine(t){   /* 11/16：流派頭像搬到最右邊（cp-fl），這�
   }
   if(tz)out.push(plIc(a.lg)+'<span class="l1">'+tz+'</span>');
   var c=(a.cw||[])[0];
-  if(c&&c[6])out.push('<span class="cp-k">'+monZh(c[0])+'</span>'+lgTag(lgZh(c[3]))+'<span class="cp-num">'+c[6]+'</span><span class="cp-k">刀 三星</span><span class="cp-num'+rateCls(Math.round(100*c[8]/c[6]),'c')+'">'+c[8]+'</span><span class="cp-k">刀</span>');
-  else if(c)out.push('<span class="cp-k">'+monZh(c[0])+'</span>'+lgTag(lgZh(c[3]))+'<span class="cp-k">沒打</span>');
+  if(c&&c[6])out.push(cwMon(c[0])+lgTag(lgZh(c[3]))+'<span class="cp-num">'+c[6]+'</span><span class="cp-k">刀 三星</span><span class="cp-num'+rateCls(Math.round(100*c[8]/c[6]),'c')+'">'+c[8]+'</span><span class="cp-k">刀</span>');
+  else if(c)out.push(cwMon(c[0])+lgTag(lgZh(c[3]))+'<span class="cp-k">沒打</span>');
   else out.push('<span class="cp-k">沒有聯賽紀錄</span>');
   return out.join('<span class="cp-k">·</span>');
 }
@@ -446,7 +534,7 @@ function detail(t){   /* 點一列：近 7 天三星率＋過去聯賽一季一�
 }
 
 /* ======== 讀寫雲端 ======== */
-function vaSync(){var v=P.vi||{};Object.keys(v).forEach(function(k){if(!VAR_INFO[k])VAR_INFO[k]=v[k]})}   /* 值班台加的新變體（有角標圖的） */
+function vaSync(){nfSync();var v=P.vi||{};Object.keys(v).forEach(function(k){if(!VAR_INFO[k])VAR_INFO[k]=v[k]})}   /* 值班台加的新變體（有角標圖的） */
 function sbGet(q){
   return fetch(SUPA_URL+'/rest/v1/snapshots?'+q,{headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY},cache:'no-store'}).then(function(r){if(!r.ok)throw r.status;return r.json()});
 }
@@ -462,8 +550,10 @@ function loadAll(){
   var ids=['_roster:'+CP_G,'_cwlpick:'+CP_G,'_cwlplan:'+CP_G+':'+m];
   return Promise.all([
     sbGet('select=id,payload&id=in.('+ids.map(function(x){return '"'+x+'"'}).join(',')+')'),
-    sbGet('select=payload&id=like._cwl:'+CP_G+':*')
+    sbGet('select=payload&id=like._cwl:'+CP_G+':*'),
+    sbGet('select=payload&id=eq._config:review').catch(function(){return []})
   ]).then(function(A){
+    RVW=(A[2]&&A[2][0]&&A[2][0].payload)||{};
     R=rowOf(A[0],ids[0])||{people:[],inbox:[]};P=rowOf(A[0],ids[1])||{a:{},cl:{},pool:{}};PL=rowOf(A[0],ids[2]);
     BASE[ids[0]]=R.at||'';BASE[ids[2]]=PL?PL.at||'':'';
     F=A[1].map(function(r){return r.payload}).filter(Boolean);
@@ -572,7 +662,7 @@ function rowHtml(t,k,where){
 function shellFlows(s){   /* 這個部落排的人（含候補）近 7 天最常用的流派，變體一層 */
   var C={},K={};s.a.forEach(function(t){var l=(P.a[t]||{}).l7,f=l&&l[2];if(!f||!f[0])return;var k=f[0]+'|'+(f[1]||'');C[k]=(C[k]||0)+1;K[k]=f});
   var L=Object.keys(C).sort(function(a,b){return C[b]-C[a]||a.localeCompare(b)});
-  return L.length?'<div class="cp-cfs">'+L.map(function(k){return '<span>'+flowIcon(K[k][0],K[k][1]||'')+'<b>'+C[k]+'</b></span>'}).join('')+'</div>':'';
+  return L.length?'<div class="cp-cfs">'+L.map(function(k){return '<span>'+flIcN(K[k][0],K[k][1])+'<b>'+C[k]+'</b></span>'}).join('')+'</div>':'';
 }
 function drawPlan(){
   if(!PL)return '<div class="cp-card"><div class="cp-empty">'+monZh(UI.mon)+'還沒開始排。</div><div style="padding:0 12px 12px"><button class="cp-btn pri" data-act="new">開始排 '+monZh(UI.mon)+'</button></div></div>';
@@ -617,7 +707,7 @@ function shareList(){
 function shareCard(s,fl){
   var rest=s.t==='rest',i=rest?{n:'休',b:'',lg:''}:shellInfo(s.t),z=rest?'':(s.lbl||i.lg),e=lgCol(z),wide=s.size>15&&!rest;
   var row=function(t,k){var l=(P.a[t]||{}).l7,f=l&&l[2];
-    return '<div class="ci-r"><span class="ci-n">'+(k+1)+'</span><div class="ci-w"><b>'+esc(nameOf(t))+'</b>'+'</div>'+(fl&&f?flowIcon(f[0],f[1]||''):'')+'</div>'};
+    return '<div class="ci-r"><span class="ci-n">'+(k+1)+'</span><div class="ci-w"><b>'+esc(nameOf(t))+'</b>'+'</div>'+(fl&&f?flIcN(f[0],f[1]):'')+'</div>'};
   var h='<div class="ci-hd">'+(i.b?'<img class="ci-bd" src="'+esc(badgePx(i.b))+'" alt="">':'')+'<div class="ci-ht"><span class="ci-mo">'+monZh(UI.mon)+'聯賽</span><b>'+esc(i.n)+'</b>'+
     (z?'<span class="ci-lg"><span style="color:'+(e[1]||'#9aa3bb')+'">'+(e[0]?'<img src="img/'+e[0]+'.webp" alt="">':'')+esc(z)+'</span></span>':'')+'</div></div>';
   var main=rest?s.a:s.a.slice(0,s.size),sub=rest?[]:s.a.slice(s.size);
@@ -668,6 +758,7 @@ function pickList(){
   R.people.forEach(function(p){(p.a||[]).forEach(function(t){
     if(UI.sheet.f==='un'&&all[t])return;
     var fs=UI.sheet.fl||{};if(Object.keys(fs).length&&!flowsOf(t).some(function(f){return fs[f]}))return;
+    var ts=UI.sheet.tz||{};if(Object.keys(ts).length&&!ts[tierZh((P.a[t]||{}).lg)])return;
     var a=P.a[t]||{},hay=(nameOf(t)+' '+pName(p)+' '+(p.dc||'')+' '+t).toLowerCase();
     if(q&&hay.indexOf(q)<0)return;
     var l1=tierZh(a.lg)==='傳一',c=(a.cw||[])[0];
@@ -682,7 +773,7 @@ function drawSheet(){
   if(!s){if(el)el.remove();document.body.style.overflow='';return}
   if(!el){el=document.createElement('div');el.id='cpSheet';el.className='cp-sheet';document.body.appendChild(el);document.body.style.overflow='hidden';
     el.innerHTML='<div class="cp-sh"><div class="cp-shr"><div class="cp-sht" id="cpShT"></div><button class="cp-ic" data-act="close" aria-label="關閉">'+IC.x+'</button></div><div class="cp-sws" id="cpSW"></div>'+
-      '<div class="cp-shr" style="margin-top:8px"><input id="cpQ" placeholder="打遊戲名字、Line、DC" autocomplete="off"></div><div class="cp-flt" id="cpFl"></div><div class="cp-ffl" id="cpFF"></div></div><div class="cp-sl"><div id="cpSL"></div></div>';
+      '<div class="cp-shr" style="margin-top:8px"><input id="cpQ" placeholder="打遊戲名字、Line、DC" autocomplete="off"></div><div id="cpFl"></div><div id="cpFF"></div></div><div class="cp-sl"><div id="cpSL"></div></div>';
     $('cpQ').value=UI.q;
     $('cpQ').addEventListener('input',function(){UI.q=this.value;drawSheetList()});
   }
@@ -693,15 +784,23 @@ function drawSheet(){
     '<button data-to="rest" class="'+(s.to==='rest'?'on':'')+'"><span>休</span><b class="cp-cnt">'+(PL.rest||[]).length+'</b></button>';
   var on=$('cpSW').querySelector('.on');if(on&&on.scrollIntoView&&!s.swd){s.swd=1;var w=$('cpSW');w.scrollLeft=on.offsetLeft-w.offsetLeft-16}
   drawFF();
-  $('cpFl').innerHTML='<button data-f="un" class="'+(s.f==='un'?'on':'')+'">還沒排</button><button data-f="all" class="'+(s.f==='all'?'on':'')+'">全部</button>';
+  $('cpFl').innerHTML='';
   drawSheetList();
 }
-function flowsOf(t){var l=(P.a[t]||{}).l7;return l?[l[2]&&l[2][0],l[3]&&l[3][0]].filter(Boolean):[]}   /* 近 7 天最常用＋第二種（傳奇才有） */
-function drawFF(){   /* 流派篩選：名冊裡有人用的流派，照人數多到少；點了只列用這些流派的人（11/16 他：讓首領可以照空軍、陸軍分配） */
+function flowsOf(t){var l=(P.a[t]||{}).l7;return l?[flKey(l[2]),flKey(l[3])].filter(Boolean):[]}   /* 近 7 天最常用＋第二種（傳奇才有） */
+function drawFF(){   /* 加人的篩選換成跟名冊一樣的工具列（UX 11/24）：段位（新的）、還沒排（一顆開關）、流派 */
+  var s=UI.sheet,sel=s.fl||{},tz=s.tz||{},C={},T={'傳一':0,'傳二':0,'傳三':0};
+  R.people.forEach(function(p){(p.a||[]).forEach(function(t){var z=tierZh((P.a[t]||{}).lg);if(z)T[z]++;flowsOf(t).forEach(function(f){C[f]=(C[f]||0)+1})})});
+  var L=Object.keys(C).sort(function(a,b){return C[b]-C[a]||a.localeCompare(b)});
+  $('cpFF').innerHTML='<div class="cp-rbx sh"><div class="cp-rbr"><span class="cp-rbk">段位</span><div class="cp-chs"><div class="cp-seg">'+['傳一','傳二','傳三'].map(function(z){return '<button data-stz="'+z+'"'+(tz[z]?' class="on"':'')+'>'+z+'<small>'+T[z]+'</small></button>'}).join('')+'</div>'+
+    '<div class="cp-seg"><button data-f="'+(s.f==='un'?'all':'un')+'"'+(s.f==='un'?' class="on"':'')+'>還沒排</button></div></div></div>'+
+    (L.length?'<div class="cp-rbr"><span class="cp-rbk">流派</span><div class="cp-chs">'+L.map(function(f){return '<button data-ff="'+esc(f)+'" class="cp-rfb'+(sel[f]?' on':'')+'" aria-label="'+esc(f.replace('其他|','其他：'))+'">'+keyIcon(f)+'<small>'+C[f]+'</small></button>'}).join('')+'</div></div>':'')+'</div>';
+}
+function drawFF_old(){   /* 流派篩選：名冊裡有人用的流派，照人數多到少；點了只列用這些流派的人（11/16 他：讓首領可以照空軍、陸軍分配） */
   var C={},sel=UI.sheet.fl||{};
   R.people.forEach(function(p){(p.a||[]).forEach(function(t){flowsOf(t).forEach(function(f){C[f]=(C[f]||0)+1})})});
   var L=Object.keys(C).sort(function(a,b){return C[b]-C[a]||a.localeCompare(b)}),any=Object.keys(sel).length;
-  $('cpFF').innerHTML='<span class="cp-ffk">流派</span>'+L.map(function(f){return '<button data-ff="'+esc(f)+'" class="'+(sel[f]?'on':'')+'" aria-label="'+esc(f)+'">'+flowIcon(f)+'<small>'+C[f]+'</small>'+(sel[f]?'<b class="cp-ffc">✓</b>':'')+'</button>'}).join('')+(any?'<button data-ff="" class="clr">清除</button>':'');
+  $('cpFF').innerHTML='<span class="cp-ffk">流派</span>'+L.map(function(f){return '<button data-ff="'+esc(f)+'" class="'+(sel[f]?'on':'')+'" aria-label="'+esc(f)+'">'+keyIcon(f)+'<small>'+C[f]+'</small>'+(sel[f]?'<b class="cp-ffc">✓</b>':'')+'</button>'}).join('')+(any?'<button data-ff="" class="clr">清除</button>':'');
 }
 function drawSheetList(){
   var all=planAll(),L=pickList(),h='';
@@ -726,13 +825,69 @@ function addTo(t,to){
   toast((from?'從 '+(from==='rest'?'休':shellInfo(from).n)+' 移到 ':'加進 ')+(to==='rest'?'休':shellInfo(to).n));
 }
 
+/* 名冊排序、篩選（11/24 他：「名冊那邊的成員 我希望你提供一些篩選機制 例如按照排位賽從高排到低」）
+   一個人看他最強的那隻（篩選時只看符合的那幾隻）；點開後帳號也照同一個順序。
+   排位＝傳一>傳二>傳三>電光33>32…>無段位，同段位比盃數。三星率：刀數夠的（傳一 8 刀、聯賽 3 刀）排在不夠的前面 */
+var RS_L=[['rk','排位'],['l','傳一三星率'],['c','上次聯賽'],['nm','名字']];
+function rkOf(a){var lg=String(a.lg||''),z=tierZh(lg);if(z)return z==='傳一'?3000:z==='傳二'?2000:1000;var m=lg.match(/(\d+)\s*$/);return m?+m[1]:0}
+function rsKey(t){
+  var a=P.a[t],s=UI.rs||'rk';if(!a||a.x)return null;
+  if(s==='rk')return [rkOf(a),a.tr||0];
+  if(s==='l'){var l=a.l7;return tierZh(a.lg)==='傳一'&&l&&l[0]?[l[0]>=RATE_MIN.l?1:0,l[1]/l[0],l[0]]:null}
+  if(s==='c'){var c=(a.cw||[])[0];return c&&c[6]?[c[6]>=RATE_MIN.c?1:0,c[8]/c[6],c[6]]:null}
+  return null;
+}
+function cmpKey(x,y){if(!x||!y)return (y?1:0)-(x?1:0);for(var i=0;i<x.length;i++)if(x[i]!==y[i])return y[i]-x[i];return 0}
+function rsVal(t){   /* 排序用的那個數字，放在帳號名字後面（排名字時不放） */
+  var a=P.a[t]||{},s=UI.rs||'rk',k=rsKey(t);if(!k)return '';
+  if(s==='rk')return tierZh(a.lg)?'<b class="cp-av">'+(a.tr||0)+'</b>':'';
+  if(s==='l'){var r=Math.round(100*a.l7[1]/a.l7[0]);return '<b class="cp-av'+rateCls(r,'l').replace(' cp-r','')+'">'+r+'%</b>'}
+  if(s==='c'){var c=a.cw[0];return '<b class="cp-av'+rateCls(Math.round(100*c[8]/c[6]),'c').replace(' cp-r','')+'">'+c[8]+'/'+c[6]+'</b>'}
+  return '';
+}
+function rfOn(){return Object.keys(UI.rf||{}).length>0}
+function rfHit(t,all){
+  var f=UI.rf||{},tz={},fl={},a=P.a[t]||{};
+  Object.keys(f).forEach(function(k){var x=k.split(':');if(x[0]==='tz')tz[x[1]]=1;else if(x[0]==='fl')fl[x[1]]=1});
+  if(Object.keys(tz).length&&!tz[tierZh(a.lg)])return false;
+  if(Object.keys(fl).length&&!flowsOf(t).some(function(x){return fl[x]}))return false;
+  if(f['un:1']&&all[t])return false;
+  return true;
+}
+function rsAccts(p,all){var L=(p.a||[]).slice();if((UI.rs||'rk')==='nm')return L;
+  var on=rfOn();return L.map(function(t,i){return {t:t,i:i,h:!on||rfHit(t,all)?1:0,k:rsKey(t)}}).sort(function(x,y){return (y.h-x.h)||cmpKey(x.k,y.k)||x.i-y.i}).map(function(x){return x.t})}
+function rsBar(){
+  var s=UI.rs||'rk',f=UI.rf||{},C={},T={'傳一':0,'傳二':0,'傳三':0},un=0,all=planAll();
+  R.people.forEach(function(p){(p.a||[]).forEach(function(t){var z=tierZh((P.a[t]||{}).lg);if(z)T[z]++;if(!all[t])un++;flowsOf(t).forEach(function(x){C[x]=(C[x]||0)+1})})});
+  var FL=Object.keys(C).sort(function(a,b){return C[b]-C[a]||a.localeCompare(b)});
+  var on=function(k){return f[k]?' class="on"':''};
+  var h='<div class="cp-rbx"><div class="cp-rbr"><span class="cp-rbk">排序</span><div class="cp-seg full" data-sk="rs">'+RS_L.map(function(x){return '<button data-rs="'+x[0]+'"'+(s===x[0]?' class="on"':'')+'>'+x[1]+'</button>'}).join('')+'</div></div>';
+  h+='<div class="cp-rbr"><span class="cp-rbk">段位</span><div class="cp-chs"><div class="cp-seg">'+['傳一','傳二','傳三'].map(function(z){return '<button data-rf="tz:'+z+'"'+on('tz:'+z)+'>'+z+'<small>'+T[z]+'</small></button>'}).join('')+'</div>'+
+    (PL?'<div class="cp-seg"><button data-rf="un:1"'+on('un:1')+'>還沒排<small>'+un+'</small></button></div>':'')+'</div></div>';
+  if(FL.length)h+='<div class="cp-rbr"><span class="cp-rbk">流派</span><div class="cp-chs">'+FL.map(function(x){return '<button data-rf="fl:'+esc(x)+'" class="cp-rfb'+(f['fl:'+x]?' on':'')+'" aria-label="'+esc(x.replace('其他|','其他：'))+'">'+keyIcon(x)+'<small>'+C[x]+'</small></button>'}).join('')+'</div></div>';
+  return h+'</div>';
+}
+/* 「其他」跟統計頁對接（11/24 他：「那個頭像問號的處理一下 請你和統計頁資料做對接」）：
+   Mac mini 判成其他時第二欄放補充（統計頁 ckNameNote／ckMixNote 同一套）；這裡讀統計頁的軍隊資料庫 _config:review，
+   補充先照別名（alias）換、再照「算成流派」（flow）換成正式流派（例：其他：狗球 → 狗球，跟統計頁流派統計一樣）；
+   換不了的留「其他」＋補充，頭像用統計頁 rowIcon（雷龍、積木、小隊圖…）。沒有補充的才是問號 */
+var RVW={},S2T={};function noteAliasMap(){return RVW.alias||{}}function noteFlowMap(){return RVW.flow||{}}
+function nfSync(){Object.keys(P.a||{}).forEach(function(t){var l=P.a[t]&&P.a[t].l7;if(!l)return;
+  [2,3].forEach(function(i){var x=l[i];if(!x||x[0]!=='其他'||!x[1])return;var n=String(x[1]).trim(),k=n,A=noteAliasMap();
+    for(var j=0;j<5&&A[k]&&A[k]!==k;j++)k=A[k];var g=noteFlowMap()[k]||noteFlowMap()[n];if(g&&g!=='其他')l[i]=[g,''];});
+  if(l[2]&&l[3]&&l[2][0]===l[3][0]&&l[2][0]!=='其他')l[3]=null;})}
+function flKey(x){return !x||!x[0]?'':x[0]==='其他'&&x[1]?'其他|'+x[1]:x[0]}
+function keyIcon(k){return k.indexOf('其他|')===0?(rowIcon({flow:'其他',note:k.slice(3)})||flowIcon('其他')):flowIcon(k)}
+function flIcN(f,v){return f==='其他'&&v?keyIcon('其他|'+v):flowIcon(f,v||'')}
 /* ======== 名冊 ======== */
 function drawRoster(){
   var na=0,nl=0;R.people.forEach(function(p){(p.a||[]).forEach(function(t){na++;if(tierZh((P.a[t]||{}).lg)==='傳一')nl++})});
   var h='<div class="cp-tiles"><div class="cp-tile"><b>'+R.people.length+'</b><span>成員</span></div><div class="cp-tile"><b>'+na+'</b><span>帳號</span></div><div class="cp-tile"><b>'+nl+'</b><span class="cp-tlg"><img src="img/lg-chuanqi.webp" alt="傳一"><i>I</i></span></div></div>';
   h+='<div class="cp-sbox">'+IC.search+'<input id="cpRQ" placeholder="找人：遊戲名字、Line、DC" autocomplete="off" value="'+esc(UI.rq||'')+'"></div>';
   if(R.inbox.length){
-    h+='<div class="cp-h3 warn">表單找不到的帳號<span class="cp-num">'+R.inbox.length+'</span></div><div class="cp-card">';
+    /* 預設收起來（UX 11/24：4 筆一直攤開，把成員擠到第二個螢幕；跟「11 月聯賽有打」一樣） */
+    h+='<button class="cp-h3 warn cp-jh" data-act="itog">表單找不到的帳號<span class="cp-num">'+R.inbox.length+'</span><span class="cp-sp"></span>'+IC.dn+'</button>';
+    if(UI.iopen){h+='<div class="cp-card">';
     R.inbox.forEach(function(x,i){
       var p=R.people.filter(function(y){return y.id===x.pid})[0];
       h+='<div class="cp-q"><div class="cp-qt"><b>'+esc(x.form)+'</b> <span>'+esc(p?pName(p):'')+'</span></div><div class="cp-qo">';
@@ -741,7 +896,7 @@ function drawRoster(){
       if((x.cand||[]).length)h+='<button data-ibgo="'+i+'" class="go"'+(ns?'':' disabled')+'>好了'+(ns?'（'+ns+' 隻）':'')+'</button>';
       h+='</div><div class="cp-in"><input data-ibin="'+i+'" placeholder="'+((x.cand||[]).length?'或貼他的玩家標籤':'貼他的玩家標籤')+'"><button class="cp-btn sm" data-ibok="'+i+'">加</button><button class="cp-btn sm" data-ibx="'+i+'">不用了</button></div></div>';
     });
-    h+='</div>';
+    h+='</div>';}
   }
   /* 11 月聯賽有打、名冊沒有（11/16 他：參考統計頁 11 月聯賽的名單抓進來，他來填 Line 名字）：R.join＝[{t, n, c＝在哪個殼子打}]
      填的 Line 名字跟名冊裡的人一樣 → 併進那個人；沒有 → 新增一個人。長名單預設收起來 */
@@ -757,19 +912,22 @@ function drawRoster(){
       h+='</div>';
     }
   }
-  var q=(UI.rq||'').trim().toLowerCase();
+  var q=(UI.rq||'').trim().toLowerCase(),RA=planAll(),RO=rfOn(),RS=UI.rs||'rk';
   var L=R.people.filter(function(p){
+    if(RO&&!(p.a||[]).some(function(t){return rfHit(t,RA)}))return false;
     if(!q)return true;
     return (p.line+' '+(p.dc||'')+' '+(p.a||[]).map(function(t){return nameOf(t)+' '+t}).join(' ')).toLowerCase().indexOf(q)>=0;
-  }).slice().sort(function(a,b){return pName(a).localeCompare(pName(b),'zh-Hant')||a.id.localeCompare(b.id)});
-  h+='<div class="cp-h3">成員</div><div class="cp-card">';
+  }).map(function(p){var b=RS==='nm'?null:rsAccts(p,RA)[0];return {p:p,k:b&&(!RO||rfHit(b,RA))?rsKey(b):null}})
+  .sort(function(x,y){return (RS==='nm'?0:cmpKey(x.k,y.k))||pName(x.p).localeCompare(pName(y.p),'zh-Hant')||x.p.id.localeCompare(y.p.id)}).map(function(x){return x.p});
+  h+=rsBar();   /* 排序、篩選放在成員名單正上方（表單、11 月那兩區在上面） */
+  h+='<div class="cp-h3">成員'+(RO||q?'<span class="cp-num">'+L.length+'</span>':'')+(RO?'<button data-rf="" class="cp-rbc">清除篩選</button>':'')+'</div><div class="cp-card">';
   L.forEach(function(p){
     var op=UI.popen[p.id];
     h+='<div class="cp-pp'+(op?' op':'')+'"><button class="cp-ph" data-pp="'+esc(p.id)+'"><div class="cp-who"><div class="cp-pn"><b>'+esc(pName(p)||'（沒填 Line）')+'</b>'+'</div>'+
-      '<div class="cp-al">'+(p.a||[]).map(function(t){return '<span class="cp-ac">'+(plIc((P.a[t]||{}).lg)||'<i class="cp-nol"></i>')+'<span>'+esc(nameOf(t))+'</span></span>'}).join('')+'</div></div><span class="cp-pc">'+(p.a||[]).length+IC.dn+'</span></button>';
+      '<div class="cp-al">'+rsAccts(p,RA).map(function(t){return '<span class="cp-ac'+(RO&&!rfHit(t,RA)?' dim':'')+'">'+(plIc((P.a[t]||{}).lg)||'<i class="cp-nol"></i>')+'<span>'+esc(nameOf(t))+'</span>'+(RS==='nm'?'':rsVal(t))+'</span>'}).join('')+'</div></div><span class="cp-pc">'+(p.a||[]).length+IC.dn+'</span></button>';
     if(op){
       h+='<div class="cp-pb"><div class="cp-fr"><label>Line</label><input data-pf="line" data-pid="'+esc(p.id)+'" value="'+esc(pName(p))+'"></div><div class="cp-fr"><label>DC</label><input data-pf="dc" data-pid="'+esc(p.id)+'" value="'+esc(p.dc||'')+'"></div>';
-      (p.a||[]).forEach(function(t){h+='<div class="cp-ar"><div class="cp-who"><div class="cp-gn">'+esc(nameOf(t))+'<em>'+esc(t)+'</em></div><div class="cp-st">'+statLine(t)+'</div></div><div class="cp-fl">'+flPair((P.a[t]||{}).l7)+'</div><button class="cp-ic" data-arm="'+esc(p.id)+'" data-t="'+esc(t)+'" aria-label="拿掉">'+IC.x+'</button></div>'});
+      rsAccts(p,RA).forEach(function(t){h+='<div class="cp-ar"><div class="cp-who"><div class="cp-gn">'+esc(nameOf(t))+'<em>'+esc(t)+'</em></div><div class="cp-st">'+statLine(t)+'</div></div><div class="cp-fl">'+flPair((P.a[t]||{}).l7)+'</div><button class="cp-ic" data-arm="'+esc(p.id)+'" data-t="'+esc(t)+'" aria-label="拿掉">'+IC.x+'</button></div>'});
       h+='<div class="cp-in"><input data-ain="'+esc(p.id)+'" placeholder="加帳號：打名字找，或貼標籤" autocomplete="off"><button class="cp-btn sm" data-aok="'+esc(p.id)+'">加</button></div><div id="cpPool_'+esc(p.id)+'"></div>';
       if(!(p.a||[]).length)h+='<div style="margin-top:10px"><button class="cp-btn sm" data-pdel="'+esc(p.id)+'">刪掉這個人</button></div>';
       h+='</div>';
@@ -806,10 +964,12 @@ function drawShells(){
     var i=shellInfo(x.t),s=inPlan[x.t];
     h+='<div class="cp-sr">'+(i.b?'<img src="'+esc(i.b)+'" alt="">':'')+'<div class="cp-cn"><b>'+esc(i.n)+'</b><span>'+esc(i.lg||'')+(i.lg?' · ':'')+esc(x.t)+'</span></div>';
     if(s){
-      h+='<select class="cp-sz" data-sz="'+esc(x.t)+'"><option'+(s.size===15?' selected':'')+'>15</option><option'+(s.size===30?' selected':'')+'>30</option></select>';
-      h+='<button class="cp-ic" data-mv="-1" data-t="'+esc(x.t)+'" aria-label="往上">'+IC.up+'</button><button class="cp-ic" data-mv="1" data-t="'+esc(x.t)+'" aria-label="往下">'+IC.dn+'</button>';
     }
-    h+='<button class="cp-sw'+(s?' on':'')+'" data-sw="'+esc(x.t)+'" aria-label="這個月要用"></button></div>';
+    h+='<button class="cp-sw'+(s?' on':'')+'" data-sw="'+esc(x.t)+'" aria-label="這個月要用"></button>';
+    /* 打開的殼子：人數、上下放第二行（UX 11/24：手機上名字只剩 4 個字） */
+    if(s)h+='<div class="cp-srx"><span class="cp-rbk">人數</span><div class="cp-seg" data-sk="sz'+esc(x.t)+'">'+[15,30].map(function(v){return '<button data-szb="'+esc(x.t)+'" data-v="'+v+'"'+(s.size===v?' class="on"':'')+'>'+v+'</button>'}).join('')+'</div><span class="cp-sp"></span>'+
+      '<button class="cp-ic" data-mv="-1" data-t="'+esc(x.t)+'" aria-label="往上">'+IC.up+'</button><button class="cp-ic" data-mv="1" data-t="'+esc(x.t)+'" aria-label="往下">'+IC.dn+'</button></div>';
+    h+='</div>';
   });
   h+='</div><div class="cp-in"><input id="cpNewS" placeholder="加殼子：貼部落標籤或連結"><button class="cp-btn" data-act="news">加</button></div>';
   if(!PL)h+='<div class="cp-empty">先到「分配」開始排 '+monZh(UI.mon)+'，這裡才能開關</div>';
@@ -821,7 +981,7 @@ function drawSave(){var e=$('cpSv');if(e){e.textContent=UI.save;e.className='cp-
 function draw(){
   var app=$('cpApp');
   var h='<div class="cp-top"><div class="cp-wrap"><div class="cp-hd"><div class="cp-ttl">聯賽分配</div><div class="cp-mon"><button data-act="mprev" aria-label="上個月">‹</button><b>'+UI.mon.slice(0,4)+'/'+UI.mon.slice(5)+'</b><button data-act="mnext" aria-label="下個月">›</button></div><span class="cp-sv" id="cpSv"></span></div>'+
-    '<div class="cp-tabs"><button class="cp-tab'+(UI.tab==='plan'?' on':'')+'" data-tab="plan">分配</button><button class="cp-tab'+(UI.tab==='roster'?' on':'')+'" data-tab="roster">名冊'+(R.inbox.length?'<span class="cp-dot">'+R.inbox.length+'</span>':'')+'</button><button class="cp-tab'+(UI.tab==='shell'?' on':'')+'" data-tab="shell">殼子</button></div></div></div><div class="cp-wrap">';
+    '<div class="cp-tabs" data-sk="tab"><button class="cp-tab'+(UI.tab==='plan'?' on':'')+'" data-tab="plan">分配</button><button class="cp-tab'+(UI.tab==='roster'?' on':'')+'" data-tab="roster">名冊'+(R.inbox.length?'<span class="cp-dot">'+R.inbox.length+'</span>':'')+'</button><button class="cp-tab'+(UI.tab==='shell'?' on':'')+'" data-tab="shell">殼子</button></div></div></div><div class="cp-wrap">';
   if(UI.conflict)h+='<div class="cp-bar">'+esc(UI.conflict)+'<button data-act="reload">重新載入</button></div>';
   h+=UI.tab==='plan'?drawPlan():UI.tab==='roster'?drawRoster():drawShells();
   h+='</div>';
@@ -850,6 +1010,7 @@ function act(e){
   if(d.pick){UI.sheet={to:d.pick,f:'un'};UI.q='';drawSheet();setTimeout(function(){var q=$('cpQ');if(q&&matchMedia('(hover:hover)').matches)q.focus()},50);return}
   if(d.act==='close'){UI.sheet=null;drawSheet();draw();return}
   if(d.ff!=null){var fl=UI.sheet.fl||(UI.sheet.fl={});if(!d.ff)UI.sheet.fl={};else if(fl[d.ff])delete fl[d.ff];else fl[d.ff]=1;drawSheet();return}
+  if(d.stz){var tz=UI.sheet.tz||(UI.sheet.tz={});if(tz[d.stz])delete tz[d.stz];else tz[d.stz]=1;drawSheet();return}
   if(d.f){UI.sheet.f=d.f;drawSheet();return}
   if(d.add){addTo(d.add,UI.sheet.to);drawSheet();return}
   if(d.to&&UI.sheet){UI.sheet.to=d.to;drawSheet();return}
@@ -859,10 +1020,13 @@ function act(e){
   }
   if(d.det!=null&&b.tagName!=='BUTTON'){UI.det=UI.det===d.det?'':d.det;draw();return}
   /* 名冊 */
+  if(d.rs){UI.rs=d.rs;draw();return}
+  if(d.rf!=null){var rf=UI.rf||(UI.rf={});if(!d.rf)UI.rf={};else if(rf[d.rf])delete rf[d.rf];else rf[d.rf]=1;draw();return}
   if(d.pp){UI.popen[d.pp]=!UI.popen[d.pp];draw();return}
   if(d.ib!=null){var x=R.inbox[+d.ib],k=ibKey(x),m=UI.ibSel[k]||(UI.ibSel[k]={});if(m[d.t])delete m[d.t];else m[d.t]=1;draw();return}
   if(d.ibgo!=null){var xg=R.inbox[+d.ibgo],kg=ibKey(xg),mg=UI.ibSel[kg]||{};Object.keys(mg).forEach(function(t){acctAdd(xg.pid,t)});delete UI.ibSel[kg];R.inbox.splice(+d.ibgo,1);saveRoster();draw();return}
   if(d.ibx!=null){R.inbox.splice(+d.ibx,1);saveRoster();draw();return}
+  if(d.act==='itog'){UI.iopen=!UI.iopen;draw();return}
   if(d.act==='jtog'){UI.jopen=!UI.jopen;draw();return}
   if(d.jok!=null){
     var ji=document.querySelector('[data-jin="'+d.jok+'"]'),jv=(ji&&ji.value||'').trim(),jx=R.join[+d.jok];if(!jx)return;
@@ -887,6 +1051,7 @@ function act(e){
     else PL.sh.push({t:d.sw,size:lastSize(d.sw),a:[]});
     savePlan();draw();return;
   }
+  if(d.szb){var z=PL.sh.filter(function(q){return q.t===d.szb})[0];if(z&&z.size!==+d.v){z.size=+d.v;savePlan();draw()}return}
   if(d.mv){var i=PL.sh.findIndex(function(z){return z.t===d.t}),j=i+(+d.mv);if(i<0||j<0||j>=PL.sh.length)return;var tmp=PL.sh[i];PL.sh[i]=PL.sh[j];PL.sh[j]=tmp;savePlan();draw();return}
   if(d.act==='news'){
     var tg2=cpTag($('cpNewS').value);if(!tg2){toast('標籤不對');return}
@@ -914,8 +1079,10 @@ function onInput(e){
 
 /* ======== 開始 ======== */
 function boot(){
-  $('cpApp').innerHTML='<div class="cp-wrap"><div class="cp-empty" style="padding-top:30vh;text-align:center">讀取中…</div></div>';
-  loadAll().then(function(){NEED.at=P.at||'';draw();needCheck()}).catch(function(){$('cpApp').innerHTML='<div class="cp-wrap"><div class="cp-bar" style="margin-top:30vh">讀不到資料<button data-act="reload">再試一次</button></div></div>'});
+  /* 載入畫面：ETC 隊徽一亮一暗＋幾張灰色的卡（形狀跟殼子卡一樣），資料到了直接換成真的、淡入 */
+  var sk=function(n){var h='<div class="cp-sk"><div class="cp-skh"><b></b><i></i></div>';for(var k=0;k<n;k++)h+='<i></i>';return h+'</div>'};
+  $('cpApp').innerHTML='<div class="cp-ld"><img class="cp-ldl" src="img/etc-96.png" alt=""><div class="cp-wrap">'+sk(4)+sk(3)+sk(3)+'</div></div>';
+  loadAll().then(function(){NEED.at=P.at||'';draw();cpFadeIn();needCheck()}).catch(function(){$('cpApp').innerHTML='<div class="cp-wrap"><div class="cp-bar" style="margin-top:30vh">讀不到資料<button data-act="reload">再試一次</button></div></div>'});
 }
 function gate(){
   var ok=false;try{ok=localStorage.getItem('cpl_pass')===CP_PASS}catch(e){}
@@ -931,6 +1098,30 @@ UI.mon=monDef();
 document.addEventListener('click',act);
 document.addEventListener('change',onChange);
 document.addEventListener('input',onInput);
+function cpFadeIn(){var a=$('cpApp');a.classList.remove('cp-fi');void a.offsetWidth;a.classList.add('cp-fi');setTimeout(function(){a.classList.remove('cp-fi')},450)}
+/* 按鈕手感（UX 11/25）：亮的那格是一塊另外的底（cp-ind），每次重畫從上一次的位置滑到新的位置 */
+var SEG_POS={};
+function segSlide(){[].forEach.call(document.querySelectorAll('[data-sk]'),function(g){
+  var on=g.querySelector(':scope>button.on');if(!on)return;
+  var k=g.getAttribute('data-sk'),ind=g.querySelector(':scope>.cp-ind');if(!ind){ind=document.createElement('i');ind.className='cp-ind';g.insertBefore(ind,g.firstChild)}
+  var to=[on.offsetLeft,on.offsetWidth],fr=SEG_POS[k]||to;SEG_POS[k]=to;
+  ind.style.transition='none';ind.style.transform='translateX('+fr[0]+'px)';ind.style.width=fr[1]+'px';g.classList.add('sl');
+  void ind.offsetWidth;ind.style.transition='';ind.style.transform='translateX('+to[0]+'px)';ind.style.width=to[1]+'px';})}
+draw=(function(o){return function(){o.apply(this,arguments);segSlide()}})(draw);
+document.addEventListener('touchstart',function(){},{passive:true});   /* iOS 要有這行，按下去的樣子（:active）才會出現 */
+/* 加人回饋（UX 11/25）：記住上一次畫出來的人數，有變的那幾個數字跳一下（總覽、卡片、加人畫面上面那排），剛好排滿再閃綠色。
+   分配頁跟加人畫面各記各的：在加人畫面加完，關掉回到分配頁時，那幾張卡的人數會再跳一次 */
+var CNT_LAST={main:null,sheet:null};
+function cntSnap(){var o={};if(PL)PL.sh.forEach(function(s){o[s.t]=[s.a.length,s.size]});return o}
+function cntBump(w){
+  var now=cntSnap(),last=CNT_LAST[w];CNT_LAST[w]=now;if(!last)return;
+  Object.keys(now).forEach(function(t){var a=now[t],b=last[t];if(!b||a[0]===b[0])return;var full=a[0]===a[1]&&b[0]<a[1];
+    var q=w==='sheet'?['#cpSW [data-to="'+t+'"] .cp-cnt']:['[data-go="'+t+'"] .cp-cnt','#cpc_'+t.slice(1)+' .cp-ch .cp-cnt'];
+    q.forEach(function(sel){[].forEach.call(document.querySelectorAll(sel),function(e){e.classList.remove('cp-bump','cp-fullfx');void e.offsetWidth;e.classList.add(full?'cp-fullfx':'cp-bump')})});
+    if(full&&w==='sheet'){var bt=document.querySelector('#cpSW [data-to="'+t+'"]');if(bt){bt.classList.remove('cp-fullbtn');void bt.offsetWidth;bt.classList.add('cp-fullbtn')}}});
+}
+draw=(function(o){return function(){o.apply(this,arguments);cntBump('main')}})(draw);
+drawSheet=(function(o){return function(){o.apply(this,arguments);if(UI.sheet)cntBump('sheet');else CNT_LAST.sheet=null}})(drawSheet);
 gate();
 </script>
 </body>
