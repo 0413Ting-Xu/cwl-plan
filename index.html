@@ -174,6 +174,21 @@ input:focus{border-color:var(--line2)}
 .cp-dql{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 12px}
 .cp-dql span{font-size:13px;color:var(--tx2);background:var(--s2);border-radius:6px;padding:3px 8px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cp-det{padding:4px 12px 10px 44px;font-size:12.5px;color:var(--tx2)}
+.cp-mto{display:flex;align-items:flex-start;gap:8px;margin:2px 0 10px}
+.cp-mto>.cp-k{flex:none;padding-top:6px}
+.cp-mtos{display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.cp-mtos button{display:flex;align-items:center;gap:5px;padding:5px 9px 5px 6px;border-radius:9px;border:1px solid #2a3248;background:linear-gradient(180deg,#1f2535,#191e2c);font-size:12.5px;color:var(--tx2)}
+.cp-mtos button img{width:18px;height:18px;object-fit:contain}
+.cp-mtos button span{max-width:6.5em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-mtos button .cp-cnt{font-size:12px}
+.cp-mtos button.cp-bn{padding:5px 11px;color:#dfe4ff;border-color:#46528a;background:#2b3560}
+.cp-lo .cp-ch .cp-cn span{color:var(--warm)}
+.cp-ovr.un .cp-cnt small{font-size:12px;font-weight:500;color:var(--tx3)}
+.cp-pk .cp-where.lo{color:var(--warm);max-width:8em;overflow:hidden;text-overflow:ellipsis}
+.cp-psh{padding:16px 16px 6px;font-size:13px;font-weight:600;color:var(--warm)}
+.cp-pk em.cp-pt{font-style:normal}
+.cp-in.cp-pf{margin:0;padding:8px 16px 12px;border-bottom:1px solid rgba(51,60,82,.55)}
+.cp-toast .cp-tu{margin-left:14px;color:#9fc1ff;font-weight:600}
 .cp-det table{border-collapse:collapse;width:100%}
 .cp-det td{padding:3px 6px 3px 0;white-space:nowrap}
 .cp-det td.r{text-align:right;font-variant-numeric:tabular-nums}
@@ -414,7 +429,7 @@ button:active{transform:scale(.95)}
 <div id="cpApp"></div>
 <script>
 /* ======== 設定 ======== */
-var CP_VERSION='2026-11-25b';
+var CP_VERSION='2026-11-25d';
 var SUPA_URL='https://evmfmwpsgnccnsaxlafz.supabase.co', SUPA_KEY='sb_publishable_y1ObqeSRZ4AD8pMSeZ1zsQ_nvtd_aFQ';
 var CP_G='legend1';
 var CP_PASS='2330';   /* 進這頁的密碼（他決定） */
@@ -456,7 +471,14 @@ function ownerOf(t){return OWN[t]||null}
 function ibKey(x){return x.pid+'|'+x.form}   /* 待確認那一列勾了哪幾隻（只在畫面上，按好了才存） */
 function pName(p){var l=String(p&&p.line||'').trim();return l&&l!=='無'?l:(p&&p.dc||'')}   /* Line 填「無」的顯示 DC */
 function calcOwn(){OWN={};R.people.forEach(function(p){(p.a||[]).forEach(function(t){OWN[t]=p})})}
-function toast(s){var e=document.createElement('div');e.className='cp-toast';e.textContent=s;document.body.appendChild(e);setTimeout(function(){e.remove()},1800)}
+function toast(s,ms){document.querySelectorAll('.cp-toast').forEach(function(x){x.remove()});var e=document.createElement('div');e.className='cp-toast';e.textContent=s;document.body.appendChild(e);setTimeout(function(){e.remove()},ms||1800)}
+/* 首領第一次（11/25 ⑥）按 × 拿掉之後那句帶「復原」 */
+function toastAct(s,lab,fn,ms){
+  document.querySelectorAll('.cp-toast').forEach(function(x){x.remove()});
+  var e=document.createElement('div');e.className='cp-toast';var sp=document.createElement('span');sp.textContent=s;e.appendChild(sp);
+  var b=document.createElement('button');b.className='cp-tu';b.textContent=lab;b.addEventListener('click',function(ev){ev.stopPropagation();e.remove();fn()});e.appendChild(b);
+  document.body.appendChild(e);setTimeout(function(){e.remove()},ms||4000);
+}
 var IC={
   share:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>',
   copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>',
@@ -576,8 +598,27 @@ function statLine(t){   /* 11/16：流派頭像搬到最右邊（cp-fl），這�
   return out.join('<span class="cp-k">·</span>');
 }
 function thBadge(t){return ''}   /* 11/16 他：幾本不用寫 */
+/* 搬到（11/25 他：「新增這位玩家從A部落直接移至B部落的選項」）：點開一列，最上面一排殼子＋休，點了就搬。
+   跟加人同一個 addTo：排到最後面、滿了先問要不要排成候補；他現在待的那個不列 */
+/* 首領第一次（11/25 ③ 他：「其他你建議的地方都可以做」）正選／候補：帶入照上個月打了幾輪排，正選、候補的切線是自動的，以前只能拿掉再加（加回去排最後面）
+   候補 → 「換成正選」：排到正選最後一格，原本最後一個正選變候補第一個；有候補時正選 →「換成候補」：變候補第一個，原本候補第一個變正選最後一格 */
+function benchRow(t){
+  var w=PL&&planAll()[t],s=w&&w!=='rest'?PL.sh.filter(function(z){return z.t===w})[0]:null;if(!s)return '';
+  var k=s.a.indexOf(t);
+  if(k>=s.size)return '<div class="cp-mto"><span class="cp-k">候補</span><div class="cp-mtos"><button class="cp-bn" data-bn="up" data-t="'+esc(t)+'">換成正選</button></div></div>';
+  if(s.a.length>s.size)return '<div class="cp-mto"><span class="cp-k">正選</span><div class="cp-mtos"><button class="cp-bn" data-bn="dn" data-t="'+esc(t)+'">換成候補</button></div></div>';
+  return '';
+}
+function mvTo(t){
+  if(!PL)return '';
+  var from=planAll()[t],L=PL.sh.filter(function(z){return z.t!==from}).map(function(z){
+    var i=shellInfo(z.t),n=z.a.length,c=n>z.size?'over':n>=z.size?'full':'';
+    return '<button data-mvto="'+esc(z.t)+'" data-t="'+esc(t)+'">'+(i.b?'<img src="'+esc(i.b)+'" alt="">':'')+'<span>'+esc(i.n)+'</span><b class="cp-cnt '+c+'">'+Math.min(n,z.size)+'/'+z.size+(n>z.size?'+'+(n-z.size):'')+'</b></button>'});
+  if(from!=='rest')L.push('<button data-mvto="rest" data-t="'+esc(t)+'"><span>休</span><b class="cp-cnt">'+(PL.rest||[]).length+'</b></button>');
+  return L.length?'<div class="cp-mto"><span class="cp-k">搬到</span><div class="cp-mtos">'+L.join('')+'</div></div>':'';
+}
 function detail(t){   /* 點一列：近 7 天三星率＋過去聯賽一季一行（11/16 他：標籤、名字、DC 放名冊就好，這裡不放） */
-  var a=P.a[t]||{},h='',o=ownerOf(t);
+  var a=P.a[t]||{},h=benchRow(t)+mvTo(t),o=ownerOf(t);
   if(o&&pName(o))h+='<div class="cp-dl"><span class="cp-k">Line</span><b>'+esc(pName(o))+'</b></div>';   /* 11/16 他：點開補 Line 名字 */
   if(a.l7&&a.l7[0])h+='<div class="cp-d7"><span class="cp-k">近 '+(P.days||7)+' 天三星率</span>'+rateHtml(Math.round(100*a.l7[1]/a.l7[0]),'l',1)+flPair(a.l7)+'</div>';
   var rows=(a.cw||[]).map(function(c){
@@ -707,7 +748,29 @@ function fromLast(){   /* 照上個月實際上場的帶入（ClashKing 記的�
     L.sort(function(a,b){return b[1]-a[1]||a[2].localeCompare(b[2])});
     L.forEach(function(x){s.a.push(x[0]);n++});
   });
-  if(!n)delete PL.undo;savePlan();draw();toast(n?'帶入 '+n+' 個帳號':'上個月沒有紀錄');
+  if(!n)delete PL.undo;savePlan();draw();var lo=loMsg();toast(n?'帶入 '+n+' 個帳號'+lo:'上個月沒有紀錄',lo?4500:1800);
+}
+/* 首領第一次（11/25 ②）上個月在「這個月沒開的殼子」打、現在還沒排的帳號（12 月＝精英那 16 個，他：「精英那16個人是最強的16位」）
+   {部落標籤:{n:部落名,L:[標籤]}}；只看名冊裡的帳號 */
+function loLeft(){
+  var G={};if(!PL)return G;var pm=monAdd(UI.mon,-1),on={},all=planAll();PL.sh.forEach(function(s){on[s.t]=1});
+  R.people.forEach(function(p){(p.a||[]).forEach(function(t){if(all[t])return;
+    var c=((P.a[t]||{}).cw||[]).filter(function(x){return x[0]===pm&&x[1]&&!on[x[1]]})[0];
+    if(c)(G[c[1]]=G[c[1]]||{n:shellInfo(c[1]).n||c[2]||c[1],L:[]}).L.push(t)})});
+  return G;
+}
+function loMsg(){var G=loLeft();return Object.keys(G).sort().map(function(k){return '・'+G[k].n+' '+G[k].L.length+' 個沒帶（'+monZh(UI.mon)+'沒開）'}).join('')}
+function unRow(t,k){   /* 還沒排的一列：跟殼子裡的一樣，沒有 ×；點開只有搬到 */
+  var dk='un|'+t,a=P.a[t]||{};
+  return '<div class="cp-row" data-det="'+esc(dk)+'"><span class="cp-n">'+(k+1)+'</span><div class="cp-who"><div class="cp-gn">'+esc(nameOf(t))+'</div><div class="cp-st">'+statLine(t)+'</div></div><div class="cp-fl">'+flPair(a.l7)+'</div></div>'+(UI.det===dk?detail(t):'');
+}
+function loCards(){
+  var G=loLeft();
+  return Object.keys(G).sort(function(a,b){return G[b].L.length-G[a].L.length||a.localeCompare(b)}).map(function(k){
+    var g=G[k],i=shellInfo(k),L=g.L.slice().sort(function(x,y){var A=P.a[x]||{},B=P.a[y]||{};return rkOf(B)-rkOf(A)||(B.tr||0)-(A.tr||0)||nameOf(x).localeCompare(nameOf(y))||x.localeCompare(y)});
+    return '<div class="cp-card cp-lo"><div class="cp-ch">'+(i.b?'<img src="'+esc(i.b)+'" alt="">':'')+'<div class="cp-cn"><b>'+esc(g.n)+'</b><span>'+monZh(UI.mon)+'沒開・還沒排</span></div><span class="cp-cnt over">'+L.length+'</span></div><div>'+
+      L.map(unRow).join('')+'</div></div>';
+  }).join('');
 }
 function rowHtml(t,k,where){
   var o=ownerOf(t),dk=where+'|'+t,a=P.a[t]||{};
@@ -726,9 +789,11 @@ function drawPlan(){
   var h='<div class="cp-ov">';   /* 11/16 他：膠囊太不整齊 → 一個殼子一行、人數靠右對齊 */
   PL.sh.forEach(function(s){var n=s.a.length,c=n>s.size?'over':n===s.size?'full':'',i=shellInfo(s.t);
     h+='<button class="cp-ovr" data-go="'+esc(s.t)+'">'+(i.b?'<img src="'+esc(i.b)+'" alt="">':'<i></i>')+'<span class="nm">'+esc(i.n)+'</span><span class="cp-cnt '+c+'">'+Math.min(n,s.size)+'/'+s.size+(n>s.size?'+'+(n-s.size):'')+'</span></button>'});
-  h+='<div class="cp-ovr un"><i></i><span class="nm">還沒排</span><span class="cp-cnt">'+un+'</span></div></div>';
+  h+='<button class="cp-ovr un" data-act="unpick"><i></i><span class="nm">還沒排</span><span class="cp-cnt">'+un+'<small> 個帳號</small></span></button></div>';
   var empty=PL.sh.every(function(s){return !s.a.length});
-  h+='<div class="cp-acts"><button class="cp-btn pri" data-act="share">分享到 Line</button>'+(empty?'<button class="cp-btn" data-act="last">照 '+monZh(monAdd(UI.mon,-1))+'實際上場帶入</button>':PL.undo?'<button class="cp-btn" data-act="undo">取消帶入</button>':'')+'</div>';
+  /* ①（首領第一次 11/25）空板子先帶入，有人了才分享 */
+  h+='<div class="cp-acts">'+(empty?'<button class="cp-btn pri" data-act="last">照 '+monZh(monAdd(UI.mon,-1))+'實際上場帶入</button>':'<button class="cp-btn pri" data-act="share">分享到 Line</button>'+(PL.undo?'<button class="cp-btn" data-act="undo">取消帶入</button>':''))+'</div>';
+  if(!empty)h+=loCards();
   PL.sh.forEach(function(s,si){
     var i=shellInfo(s.t),n=s.a.length,c=n>s.size?'over':n===s.size?'full':'';
     var z=s.lbl||i.lg||'';
@@ -808,8 +873,9 @@ function shareFiles(F){
 }
 
 /* ======== 選人（全螢幕） ======== */
+function loIdx(){var o={},G=loLeft();Object.keys(G).forEach(function(k){G[k].L.forEach(function(t){o[t]=G[k].n})});return o}
 function pickList(){
-  var all=planAll(),q=UI.q.trim().toLowerCase(),L=[];
+  var all=planAll(),q=UI.q.trim().toLowerCase(),L=[],LO=loIdx();
   R.people.forEach(function(p){(p.a||[]).forEach(function(t){
     if(UI.sheet.f==='un'&&all[t])return;
     var fs=UI.sheet.fl||{};if(Object.keys(fs).length&&!flowsOf(t).some(function(f){return fs[f]}))return;
@@ -818,9 +884,9 @@ function pickList(){
     if(q&&hay.indexOf(q)<0)return;
     var l1=tierZh(a.lg)==='傳一',c=(a.cw||[])[0];
     var rr=rateOf(t);
-    L.push({t:t,p:p,un:!all[t],l1:l1,s1:l1?(a.tr||0):0,s2:c?c[7]/Math.max(1,c[6]):-1,rt:rr?rr[1]:-1,n:nameOf(t)});
+    L.push({t:t,p:p,un:!all[t],lo:LO[t]?1:0,l1:l1,s1:l1?(a.tr||0):0,s2:c?c[7]/Math.max(1,c[6]):-1,rt:rr?rr[1]:-1,n:nameOf(t)});
   })});
-  L.sort(function(a,b){return (b.un-a.un)||(b.l1-a.l1)||(b.s1-a.s1)||(b.s2-a.s2)||a.n.localeCompare(b.n)||a.t.localeCompare(b.t)});
+  L.sort(function(a,b){return (b.un-a.un)||(b.lo-a.lo)||(b.l1-a.l1)||(b.s1-a.s1)||(b.s2-a.s2)||a.n.localeCompare(b.n)||a.t.localeCompare(b.t)});
   return L;
 }
 function drawSheet(){
@@ -857,13 +923,23 @@ function drawFF_old(){   /* 流派篩選：名冊裡有人用的流派，照人�
   var L=Object.keys(C).sort(function(a,b){return C[b]-C[a]||a.localeCompare(b)}),any=Object.keys(sel).length;
   $('cpFF').innerHTML='<span class="cp-ffk">流派</span>'+L.map(function(f){return '<button data-ff="'+esc(f)+'" class="'+(sel[f]?'on':'')+'" aria-label="'+esc(f)+'">'+keyIcon(f)+'<small>'+C[f]+'</small>'+(sel[f]?'<b class="cp-ffc">✓</b>':'')+'</button>'}).join('')+(any?'<button data-ff="" class="clr">清除</button>':'');
 }
-function drawSheetList(){
-  var all=planAll(),L=pickList(),h='';
+function drawSheetList(){   /* ②④ 首領第一次（11/25）：沒開的殼子那些人標出來；名冊找不到時列名冊外的人 */
+  var all=planAll(),L=pickList(),h='',LO=loIdx(),pm=monZh(monAdd(UI.mon,-1));
   L.forEach(function(x){
-    var w=all[x.t],wn=w==='rest'?'休':w?shellInfo(w).n:'',here=w===UI.sheet.to;
-    h+='<button class="cp-pk" data-add="'+esc(x.t)+'"><div class="cp-who"><div class="cp-gn">'+thBadge(x.t)+esc(x.n)+'<em>'+esc(pName(x.p))+'</em></div><div class="cp-st">'+statLine(x.t)+'</div></div><div class="cp-fl">'+flPair((P.a[x.t]||{}).l7)+'</div>'+(wn?'<span class="cp-where'+(here?' here':'')+'">'+esc(wn)+'</span>':'')+'</button>';
+    var w=all[x.t],wn=w==='rest'?'休':w?shellInfo(w).n:LO[x.t]?pm+' '+LO[x.t]:'',here=w===UI.sheet.to;
+    h+='<button class="cp-pk" data-add="'+esc(x.t)+'"><div class="cp-who"><div class="cp-gn">'+thBadge(x.t)+esc(x.n)+'<em>'+esc(pName(x.p))+'</em></div><div class="cp-st">'+statLine(x.t)+'</div></div><div class="cp-fl">'+flPair((P.a[x.t]||{}).l7)+'</div>'+(wn?'<span class="cp-where'+(here?' here':!w&&LO[x.t]?' lo':'')+'">'+esc(wn)+'</span>':'')+'</button>';
   });
-  $('cpSL').innerHTML=h||'<div class="cp-empty">'+(UI.sheet.f==='un'?'都排好了':'找不到')+'</div>';
+  var q=UI.q.trim(),PH=q?poolHits(q):[],h2='';
+  if(PH.length){   /* ④ 名冊外（部落裡、ETC）：點一下填 Line 名字，一次加進名冊＋排進來 */
+    var src=whoSrc(),IX=whoIdx(src);
+    h2='<div class="cp-psh">名冊外（部落裡、ETC）</div>';
+    PH.forEach(function(x){var t=x[0],c=IX[t];
+      h2+='<button class="cp-pk" data-plf="'+esc(t)+'"><div class="cp-who"><div class="cp-gn">'+esc(x[1])+'<em class="cp-pt">'+esc(t)+'</em></div></div>'+(c?'<span class="cp-where">'+esc((src.cl[c]||{}).n||shellInfo(c).n)+'</span>':'')+'</button>';
+      if(UI.sheet.pf===t)h2+='<div class="cp-in cp-pf"><input id="cpPfL" list="cpLinesS" placeholder="他的 Line 名字" autocomplete="off"><button class="cp-btn sm pri" data-plok="'+esc(t)+'">加進來</button></div>';
+    });
+    h2+='<datalist id="cpLinesS">'+R.people.map(function(p){return '<option value="'+esc(pName(p))+'">'}).join('')+'</datalist>';
+  }
+  $('cpSL').innerHTML=(h||'<div class="cp-empty">'+(h2?'名冊裡找不到':UI.sheet.f==='un'&&!q?'都排好了':'找不到')+'</div>')+h2;
 }
 function addTo(t,to){
   var all=planAll(),from=all[t];
@@ -1208,9 +1284,21 @@ function act(e){
   if(d.f){UI.sheet.f=d.f;drawSheet();return}
   if(d.add){addTo(d.add,UI.sheet.to);drawSheet();return}
   if(d.to&&UI.sheet){UI.sheet.to=d.to;drawSheet();return}
-  if(d.rm){
-    var t=d.t;if(d.rm==='rest')PL.rest=PL.rest.filter(function(x){return x!==t});else PL.sh.forEach(function(s){if(s.t===d.rm)s.a=s.a.filter(function(x){return x!==t})});
-    savePlan();draw();return;
+  if(d.mvto){addTo(d.t,d.mvto);draw();return}   /* 搬到（11/25） */
+  /* 首領第一次（11/25）：③ 正選／候補、② 還沒排打開加人、④ 名冊外加進來 */
+  if(d.bn){var bw=planAll()[d.t],bs=PL.sh.filter(function(z){return z.t===bw})[0];if(!bs)return;var bk=bs.a.indexOf(d.t);if(bk<0)return;
+    bs.a.splice(bk,1);bs.a.splice(d.bn==='up'?bs.size-1:bs.size,0,d.t);var bo=bs.a[d.bn==='up'?bs.size:bs.size-1];
+    savePlan();draw();toast(nameOf(d.t)+(d.bn==='up'?' 換成正選・'+nameOf(bo)+' 變候補':' 換成候補・'+nameOf(bo)+' 變正選'),3000);return}
+  if(d.act==='unpick'){if(!PL)return;var ut=PL.sh.filter(function(z){return z.a.length<z.size})[0]||PL.sh[0];if(!ut)return;UI.sheet={to:ut.t,f:'un'};UI.q='';drawSheet();return}
+  if(d.plf){UI.sheet.pf=UI.sheet.pf===d.plf?'':d.plf;drawSheetList();setTimeout(function(){var pi=$('cpPfL');if(pi)pi.focus()},30);return}
+  if(d.plok){var pv=(($('cpPfL')||{}).value||'').trim(),pt=d.plok;if(!pv){toast('先填 Line 名字');return}
+    var pk=pv.toLowerCase(),pp=R.people.filter(function(p){return pName(p).trim().toLowerCase()===pk||String(p.line||'').trim().toLowerCase()===pk})[0];
+    if(pp){if(pp.a.indexOf(pt)<0)pp.a.push(pt)}else R.people.push({id:'p'+Date.now().toString(36),line:pv,dc:'',a:[pt]});
+    saveRoster();UI.sheet.pf='';addTo(pt,UI.sheet.to);drawSheet();return}
+  if(d.rm){   /* ⑥（首領第一次 11/25）拿掉之後那句可以復原，放回原本的位置 */
+    var rt=d.t;if(!PL.rest)PL.rest=[];var ra=d.rm==='rest'?PL.rest:(PL.sh.filter(function(s){return s.t===d.rm})[0]||{}).a;if(!ra)return;var rk=ra.indexOf(rt);if(rk<0)return;
+    ra.splice(rk,1);savePlan();draw();
+    toastAct('拿掉 '+nameOf(rt),'復原',function(){if(planAll()[rt])return;ra.splice(Math.min(rk,ra.length),0,rt);savePlan();draw()});return;
   }
   if(d.det!=null&&b.tagName!=='BUTTON'){UI.det=UI.det===d.det?'':d.det;draw();return}
   /* 名冊 */
