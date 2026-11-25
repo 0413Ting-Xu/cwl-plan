@@ -121,6 +121,58 @@ input:focus{border-color:var(--line2)}
 .cp-th.low{color:var(--warm);border-color:rgba(214,160,95,.5)}
 .cp-sub{padding:7px 12px 5px;font-size:12px;color:var(--tx3);background:rgba(0,0,0,.12);border-top:1px solid var(--line)}
 .cp-add{display:block;width:100%;padding:11px 12px;text-align:left;color:var(--soft);font-weight:500;border-top:1px solid var(--line)}
+/* 到齊了沒（11/25）：總覽沿用分配頁那張；卡片右上大數字＝已到／排了幾個（主力），全部到齊變綠 */
+.cp-dqv{margin:14px 0 4px;padding:4px 0;background:linear-gradient(180deg,#1f2535,#191e2c);border:1px solid #2a3248;border-radius:14px}
+.cp-dqvr{display:flex;flex-wrap:wrap;align-items:center;gap:11px;width:100%;padding:11px 14px;text-align:left}
+.cp-dqvr+.cp-dqvr{border-top:1px solid rgba(51,60,82,.55)}
+.cp-dqvr:active{transform:scale(.985)}
+.cp-dqvr>img,.cp-dqvr>i{width:30px;height:30px;flex:none;object-fit:contain}
+.cp-dqvr .nm{flex:1;min-width:0;font-size:15px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-dqvr .ct{display:flex;align-items:center;gap:8px;flex:none}
+.cp-dqvr .bar{flex:none;width:calc(100% - 41px);margin:-3px 0 0 41px;height:6px;border-radius:3px;background:#2a3248;overflow:hidden}
+.cp-dqvr .bar b{display:block;height:100%;border-radius:3px;background:#ef7d72}
+.cp-dqvr.ok .bar b{background:var(--good)}
+.cp-dqv .n{font-family:'Russo One',Rubik,sans-serif;font-size:20px;line-height:1;white-space:nowrap}
+.cp-dqv .n small{font-size:13px;color:var(--tx3);margin-left:1px}
+.cp-dqv .ng .n{color:#ef7d72}
+.cp-dqv .ok .n{color:var(--good)}
+/* 到齊特效（11/25 他：「全員到齊的話再幫我加上一個持續跑動的好看的特效」→ 三種裡挑乙 呼吸光）：整個部落到齊的那條和數字一亮一暗；手機開「減少動態」就不動 */
+.cp-dqvr.ok .bar{overflow:visible}
+.cp-dqvr.ok .bar b{animation:cpBreath 2.2s ease-in-out infinite}
+.cp-dqvr.ok .n{animation:cpGlowN 2.2s ease-in-out infinite}
+@keyframes cpBreath{0%,100%{box-shadow:0 0 0 rgba(111,191,139,0);filter:brightness(1)}50%{box-shadow:0 0 12px 1px rgba(111,191,139,.95);filter:brightness(1.4)}}
+@keyframes cpGlowN{0%,100%{text-shadow:0 0 0 rgba(111,191,139,0)}50%{text-shadow:0 0 12px rgba(111,191,139,.9)}}
+@media (prefers-reduced-motion:reduce){.cp-dqv .bar b,.cp-dqv .n{animation:none!important}}
+.cp-dqb{font-size:12px;font-weight:600;line-height:1.4;color:#f0a49c;border:1px solid rgba(239,125,114,.45);border-radius:6px;padding:1px 6px;white-space:nowrap}
+.cp-dqb.ok{color:var(--good);border-color:rgba(111,191,139,.45)}
+.cp-dqs{font-size:13px;font-weight:600;color:#c9cfdd;padding:8px 12px 6px}
+.cp-dqs.ng{color:#f0a49c}
+.cp-dqn.ng{color:#ef7d72}
+.cp-dqa{align-items:center}
+.cp-dqt{margin-left:auto;font-size:12.5px;color:var(--tx3);white-space:nowrap}
+.cp-dqt.old{color:var(--loss)}
+.cp-dqt.busy{color:var(--soft)}
+.cp-dqr{display:flex;align-items:center;gap:5px;padding:9px 12px}
+.cp-dqr svg{width:15px;height:15px}
+.cp-dqr.busy svg{animation:cpSpin .8s linear infinite}
+@keyframes cpSpin{to{transform:rotate(360deg)}}
+.cp-dqc.ok{border-color:rgba(111,191,139,.45)}
+.cp-dqn{font-family:'Russo One',Rubik,sans-serif;font-size:22px;color:var(--tx);white-space:nowrap;line-height:1}
+.cp-dqn small{font-size:14px;color:var(--tx3);margin-left:1px}
+.cp-dqn.ok{color:var(--good)}
+.cp-dqg{color:var(--warm)}
+.cp-dqw{flex:none;max-width:50%;font-size:12.5px;color:var(--tx2);background:var(--s2);border:1px solid var(--line);border-radius:7px;padding:3px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-dqw.wr{color:var(--warm);border-color:rgba(214,160,95,.45);background:rgba(214,160,95,.08)}
+.cp-dqw.no{color:#f0b3ad;border-color:rgba(217,88,78,.45);background:rgba(217,88,78,.08)}
+.cp-st .k{color:var(--tx4);margin-right:5px}
+.cp-dqok{display:flex;align-items:center;gap:6px;padding:11px 12px;color:var(--good);font-size:14px;font-weight:500}
+.cp-dqok svg{width:16px;height:16px}
+.cp-dqo{display:flex;align-items:center;gap:6px;width:100%;padding:10px 12px;border-top:1px solid var(--line);color:var(--tx3);font-size:13.5px;text-align:left}
+.cp-dqo:active{transform:scale(.985)}
+.cp-dqo svg{width:16px;height:16px;transition:transform .15s}
+.cp-dqo.on svg{transform:rotate(180deg)}
+.cp-dql{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 12px}
+.cp-dql span{font-size:13px;color:var(--tx2);background:var(--s2);border-radius:6px;padding:3px 8px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cp-det{padding:4px 12px 10px 44px;font-size:12.5px;color:var(--tx2)}
 .cp-det table{border-collapse:collapse;width:100%}
 .cp-det td{padding:3px 6px 3px 0;white-space:nowrap}
@@ -362,7 +414,7 @@ button:active{transform:scale(.95)}
 <div id="cpApp"></div>
 <script>
 /* ======== 設定 ======== */
-var CP_VERSION='2026-11-25a';
+var CP_VERSION='2026-11-25b';
 var SUPA_URL='https://evmfmwpsgnccnsaxlafz.supabase.co', SUPA_KEY='sb_publishable_y1ObqeSRZ4AD8pMSeZ1zsQ_nvtd_aFQ';
 var CP_G='legend1';
 var CP_PASS='2330';   /* 進這頁的密碼（他決定） */
@@ -376,6 +428,7 @@ var PL=null;                       /* 這個月的分配 _cwlplan:legend1:<月> 
 var BASE={};                       /* 每一列讀進來時的 at：存之前比對，別人改過就不蓋 */
 var UI={ibSel:{},tab:'plan',mon:'',open:{},popen:{},q:'',sheet:null,conflict:'',save:'',det:''};
 var OWN={};                        /* 帳號 → 人 */
+var WHO=null;                      /* 部落現在的成員 _cwlwho:legend1（Mac mini 寫）；沒有就用 P.cl（每天 13:20） */
 
 /* ======== 小工具 ======== */
 function $(id){return document.getElementById(id)}
@@ -551,9 +604,11 @@ function loadAll(){
   return Promise.all([
     sbGet('select=id,payload&id=in.('+ids.map(function(x){return '"'+x+'"'}).join(',')+')'),
     sbGet('select=payload&id=like._cwl:'+CP_G+':*'),
-    sbGet('select=payload&id=eq._config:review').catch(function(){return []})
+    sbGet('select=payload&id=eq._config:review').catch(function(){return []}),
+    sbGet('select=payload&id=eq._cwlwho:'+CP_G).catch(function(){return []})
   ]).then(function(A){
     RVW=(A[2]&&A[2][0]&&A[2][0].payload)||{};
+    WHO=(A[3]&&A[3][0]&&A[3][0].payload&&A[3][0].payload.cl)?A[3][0].payload:null;
     R=rowOf(A[0],ids[0])||{people:[],inbox:[]};P=rowOf(A[0],ids[1])||{a:{},cl:{},pool:{}};PL=rowOf(A[0],ids[2]);
     BASE[ids[0]]=R.at||'';BASE[ids[2]]=PL?PL.at||'':'';
     F=A[1].map(function(r){return r.payload}).filter(Boolean);
@@ -880,6 +935,144 @@ function flKey(x){return !x||!x[0]?'':x[0]==='其他'&&x[1]?'其他|'+x[1]:x[0]}
 function keyIcon(k){return k.indexOf('其他|')===0?(rowIcon({flow:'其他',note:k.slice(3)})||flowIcon('其他')):flowIcon(k)}
 function flIcN(f,v){return f==='其他'&&v?keyIcon('其他|'+v):flowIcon(f,v||'')}
 /* ======== 名冊 ======== */
+/* ======== 到齊了沒（11/25 他：「人到了沒這個功能極度實用…首領這樣也不會開遊戲上去一個一個檢查」；名字他取的）========
+   排在每個殼子的人（UI.mon 那個月的分配），現在是不是已經在那個部落。
+   部落成員：WHO（Mac mini 問官方寫的）；還沒有就用 P.cl（Mac mini 每天 13:20 全部更新時存的）
+   更新（他：「要確保有效 不要有資訊差」）：寫紙條 _cwlwhoreq → Mac mini 問官方 → _cwlwho 的 req 等於紙條的 at 才算更新好 */
+IC.re='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>';
+var DQ_OPEN={},DQ_RQ={st:'',at:''},DQ_WAIT=45;   /* 更新：st ''／busy／fail；等 Mac mini 最多 45 秒 */
+function whoSrc(){
+  if(WHO&&WHO.cl)return {cl:WHO.cl,at:WHO.at||''};
+  var cl={};Object.keys(P.cl||{}).forEach(function(t){cl[t]={n:P.cl[t].n,m:P.cl[t].m||[]}});return {cl:cl,at:P.at||''};
+}
+function whoIdx(src){var o={};Object.keys(src.cl).sort().forEach(function(c){(src.cl[c].m||[]).forEach(function(t){if(!o[t])o[t]=c})});return o}
+function whereOf(t,src,IX){   /* [部落標籤, 名字]；'' 沒有部落；'?' 不知道（離開了我們看得到的部落、或沒資料） */
+  var q=WHO&&WHO.pl&&WHO.pl[t];   /* 還不在他排的部落名單裡的人，Mac mini 直接問了本人（[部落標籤, 名字]，沒部落是 ['','']）；官方部落名單快取 120 秒、本人 43 秒 → 本人優先 */
+  if(q)return q[0]?[q[0],q[1]||(src.cl[q[0]]||{}).n||q[0]]:['',''];
+  if(IX[t])return [IX[t],(src.cl[IX[t]]||{}).n||shellInfo(IX[t]).n];
+  var a=P.a[t],c=a&&a.c;
+  if(c&&c[0]&&!src.cl[c[0]])return [c[0],c[1]||c[0]];
+  if(c&&c[0]||!a)return ['?',''];
+  return ['',''];
+}
+function whoAgo(at){
+  if(!at)return ['還沒有資料',true];
+  var m=Math.max(0,Math.floor((Date.now()-Date.parse(at))/60000));
+  return [m<1?'剛剛':m<60?m+' 分鐘前':m<1440?Math.floor(m/60)+' 小時前':Math.floor(m/1440)+' 天前',m>=60];
+}
+function whoCalc(){
+  var src=whoSrc(),IX=whoIdx(src);
+  return PL.sh.map(function(s){
+    var c={s:s,mi:[],bi:[],ok:[]};
+    s.a.forEach(function(t,k){var w=whereOf(t,src,IX);(w[0]===s.t?c.ok:k<s.size?c.mi:c.bi).push([t,w,k])});
+    c.nM=Math.min(s.a.length,s.size);c.nB=Math.max(0,s.a.length-s.size);
+    c.okM=c.ok.filter(function(x){return x[2]<s.size}).length;c.okB=c.ok.length-c.okM;
+    /* 「跑錯地方」那段 11/25 拿掉（他：「為了避免冤枉」；跟該去的那張卡重複，開門號、管理員會被冤枉）→ 只在該去的那張卡標橘色「在 某殼子」 */
+    c.done=c.nM>0&&c.okM===c.nM&&c.okB===c.nB;
+    return c;
+  });
+}
+function dqRow(t,lab,cls){
+  var o=ownerOf(t),ln=o?pName(o):'',n=nameOf(t);
+  return '<div class="cp-row"><div class="cp-who"><div class="cp-gn">'+esc(n)+'</div>'+(ln&&ln!==n?'<div class="cp-st"><span class="k">Line</span>'+esc(ln)+'</div>':'')+'</div><span class="cp-dqw'+(cls?' '+cls:'')+'">'+esc(lab)+'</span></div>';
+}
+function dqWhere(w){
+  if(w[0]==='')return ['沒加入部落','no'];   /* 這個帳號現在沒有加入任何部落 */
+  if(w[0]==='?')return ['查不到','no'];      /* 官方問不到他現在在哪 */
+  return ['在 '+w[1],PL.sh.some(function(x){return x.t===w[0]})?'wr':''];
+}
+function dqText(list){   /* 貼 Line：部落名、部落連結（點了直接打開那個部落）、還沒到的人（Line 名字跟遊戲名字不一樣才寫） */
+  var L=[],f=function(x){var o=ownerOf(x[0]),n=nameOf(x[0]),ln=o?pName(o):'';return n+(ln&&ln!==n?'（'+ln+'）':'')};
+  list.forEach(function(c){
+    if(!c.mi.length&&!c.bi.length)return;
+    L.push(shellInfo(c.s.t).n+' 還沒到 '+(c.mi.length+c.bi.length)+' 人');
+    L.push('https://link.clashofclans.com/cnt?action=OpenClanProfile&tag='+c.s.t.slice(1));
+    c.mi.forEach(function(x){L.push(f(x))});
+    if(c.bi.length){L.push('候補');c.bi.forEach(function(x){L.push(f(x))})}
+    L.push('');
+  });
+  return L.join('\n').trim();
+}
+function dqTime(){   /* 更新鈕左邊那幾個字 */
+  if(DQ_RQ.st==='busy')return ['更新中…','busy'];
+  if(DQ_RQ.st==='fail')return ['沒更新到','old'];
+  var bad=(WHO&&WHO.bad||[]).filter(function(t){return PL&&PL.sh.some(function(s){return s.t===t})});
+  if(bad.length)return [bad.length+' 個部落沒問到','old'];
+  var a=whoAgo(whoSrc().at);return [a[0],a[1]?'old':''];
+}
+function dqBar(miss){var t=dqTime();
+  return '<div class="cp-acts cp-dqa"><button class="cp-btn pri" data-act="dqcp"'+(miss?'':' disabled')+'>複製還沒到的名單</button><span class="cp-dqt'+(t[1]?' '+t[1]:'')+'" id="cpDqT">'+t[0]+'</span>'+
+    '<button class="cp-btn cp-dqr'+(DQ_RQ.st==='busy'?' busy':'')+'" data-act="dqre" id="cpDqR">'+IC.re+'更新</button></div>';
+}
+/* 總覽（11/25 他：「看有點小 沒辦法一眼看到重點」「沒到齊可以標紅 候補也要顯示」→ 三種裡選乙 進度條）：沒到齊紅、到齊綠，候補小框 */
+function dqBench(c){return c.nB?'<span class="cp-dqb'+(c.okB===c.nB?' ok':'')+'">候補 '+c.okB+'/'+c.nB+'</span>':''}
+function dqOvrBox(C){
+  var h='<div class="cp-dqv">';
+  C.forEach(function(c){var i=shellInfo(c.s.t);
+    h+='<button class="cp-dqvr '+(c.done?'ok':'ng')+'" data-dqgo="'+esc(c.s.t)+'">'+(i.b?'<img src="'+esc(i.b)+'" alt="">':'<i></i>')+'<span class="nm">'+esc(i.n)+'</span>'+
+      '<span class="ct">'+dqBench(c)+'<span class="n">'+c.okM+'<small>/'+c.nM+'</small></span></span><i class="bar"><b style="width:'+(c.nM?Math.round(c.okM/c.nM*100):0)+'%"></b></i></button>';
+  });
+  return h+'</div>';
+}
+function dqHead(c){
+  var s=c.s,i=shellInfo(s.t),z=s.lbl||i.lg||'',gap=s.size-c.nM,sub=[];
+  if(z)sub.push(lgTag(z));if(c.nB)sub.push(dqBench(c));if(gap>0)sub.push('<span class="cp-dqg">還有 '+gap+' 格沒排</span>');
+  return '<div class="cp-ch">'+(i.b?'<img src="'+esc(i.b)+'" alt="">':'')+'<div class="cp-cn"><b>'+esc(i.n)+'</b><span>'+sub.join(' · ')+'</span></div>'+
+    '<span class="cp-dqn '+(c.done?'ok':'ng')+'">'+c.okM+'<small>/'+c.nM+'</small></span>'+(c.mi.length+c.bi.length?'<button class="cp-ic" data-dqcp="'+esc(s.t)+'" aria-label="複製還沒到的">'+IC.copy+'</button>':'')+'</div>';
+}
+function dqOk(c){
+  if(!c.ok.length)return '';var op=DQ_OPEN[c.s.t];
+  return '<button class="cp-dqo'+(op?' on':'')+'" data-dqo="'+esc(c.s.t)+'">已到 '+c.ok.length+' 人'+IC.dn+'</button>'+
+    (op?'<div class="cp-dql">'+c.ok.map(function(x){return '<span>'+esc(nameOf(x[0]))+'</span>'}).join('')+'</div>':'');
+}
+function dqCard(c){
+  var h='<div class="cp-card cp-dqc'+(c.done?' ok':'')+'" id="cpw_'+esc(c.s.t.slice(1))+'">'+dqHead(c);
+  if(c.done)h+='<div class="cp-dqok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>全部到齊</div>';
+  if(c.mi.length){h+='<div class="cp-sub cp-dqs ng">還沒到</div>';c.mi.forEach(function(x){var w=dqWhere(x[1]);h+=dqRow(x[0],w[0],w[1])})}
+  if(c.bi.length){h+='<div class="cp-sub cp-dqs ng">候補還沒到</div>';c.bi.forEach(function(x){var w=dqWhere(x[1]);h+=dqRow(x[0],w[0],w[1])})}
+  return h+dqOk(c)+'</div>';
+}
+function dqEmpty(k){
+  return '<div class="cp-card"><div class="cp-empty">'+monZh(UI.mon)+(k?'還沒排人。':'還沒開始排。')+'</div></div>';
+}
+function drawWho(){
+  if(!PL)return dqEmpty(0);
+  if(PL.sh.every(function(s){return !s.a.length}))return dqEmpty(1);
+  var C=whoCalc(),miss=0;C.forEach(function(c){miss+=c.mi.length+c.bi.length});
+  return dqOvrBox(C)+dqBar(miss)+C.map(dqCard).join('');
+}
+function whoAct(d){
+  if(d.dqgo){var e=$('cpw_'+d.dqgo.slice(1));if(e)e.scrollIntoView({behavior:'smooth',block:'start'});return true}
+  if(d.dqo){DQ_OPEN[d.dqo]=!DQ_OPEN[d.dqo];draw();return true}
+  if(d.dqcp){copy(dqText(whoCalc().filter(function(x){return x.s.t===d.dqcp})));return true}
+  if(d.act==='dqcp'){copy(dqText(whoCalc()));return true}
+  if(d.act==='dqre'){whoRefresh();return true}
+  return false;
+}
+function whoHash(){try{history.replaceState(null,'',location.pathname+location.search+(UI.tab==='who'?'#who':''))}catch(e){}}
+function dqBarUp(){var t=$('cpDqT'),b=$('cpDqR');if(!t)return;var x=dqTime();t.textContent=x[0];t.className='cp-dqt'+(x[1]?' '+x[1]:'');if(b)b.classList.toggle('busy',DQ_RQ.st==='busy')}
+function whoRefresh(){   /* 按更新：寫紙條叫 Mac mini 馬上問官方，等它寫回來（req 對上紙條的 at 才算），最多 45 秒 */
+  if(DQ_RQ.st==='busy'||CP_PV)return;
+  var at=new Date().toISOString(),t0=Date.now();DQ_RQ={st:'busy',at:at};dqBarUp();
+  var fail=function(){DQ_RQ={st:'fail',at:''};dqBarUp()};
+  var again=function(){if(Date.now()-t0>DQ_WAIT*1000)fail();else setTimeout(poll,2000)};
+  var poll=function(){sbGet('select=req:payload->>req&id=eq._cwlwho:'+CP_G).then(function(x){var r=x&&x[0]&&x[0].req;
+      if(!(r&&r>=at))return again();
+      return sbGet('select=payload&id=eq._cwlwho:'+CP_G).then(function(y){var p=y&&y[0]&&y[0].payload;if(!(p&&p.cl))return again();
+        WHO=p;DQ_RQ={st:'',at:''};if(UI.tab==='who'&&!UI.sheet)draw();else dqBarUp()})}).catch(again)};
+  fetch(SUPA_URL+'/rest/v1/snapshots',{method:'POST',headers:{apikey:SUPA_KEY,Authorization:'Bearer '+SUPA_KEY,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates'},
+    body:JSON.stringify([{id:'_cwlwhoreq:'+CP_G,player:'_config',device:'_config',updated_at:at,payload:{kind:'cwlwhoreq',group:'_config',g:CP_G,at:at}}])})
+    .then(function(r){if(!r.ok)throw r.status;setTimeout(poll,1500)}).catch(fail);
+}
+function whoAuto(){var a=Date.parse(whoSrc().at);if(!(a>Date.now()-60000))whoRefresh()}   /* 打開這頁、切回來：超過 1 分鐘就自己更新 */
+function whoPull(){   /* 開著這頁：每分鐘問一次那一列（幾十個字），換了才整頁重畫 */
+  if(CP_PV||DQ_RQ.st==='busy')return;
+  sbGet('select=at:payload->>at&id=eq._cwlwho:'+CP_G).then(function(r){var a=r&&r[0]&&r[0].at;
+    if(!a||(WHO&&a===WHO.at)){dqBarUp();return}
+    return sbGet('select=payload&id=eq._cwlwho:'+CP_G).then(function(y){var p=y&&y[0]&&y[0].payload;if(p&&p.cl&&DQ_RQ.st!=='busy'){WHO=p;if(UI.tab==='who'&&!UI.sheet)draw()}})}).catch(function(){});
+}
+setInterval(function(){if(UI.tab==='who'&&document.visibilityState==='visible')whoPull()},60000);
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&UI.tab==='who'){whoPull();whoAuto()}});
 function drawRoster(){
   var na=0,nl=0;R.people.forEach(function(p){(p.a||[]).forEach(function(t){na++;if(tierZh((P.a[t]||{}).lg)==='傳一')nl++})});
   var h='<div class="cp-tiles"><div class="cp-tile"><b>'+R.people.length+'</b><span>成員</span></div><div class="cp-tile"><b>'+na+'</b><span>帳號</span></div><div class="cp-tile"><b>'+nl+'</b><span class="cp-tlg"><img src="img/lg-chuanqi.webp" alt="傳一"><i>I</i></span></div></div>';
@@ -981,15 +1174,16 @@ function drawSave(){var e=$('cpSv');if(e){e.textContent=UI.save;e.className='cp-
 function draw(){
   var app=$('cpApp');
   var h='<div class="cp-top"><div class="cp-wrap"><div class="cp-hd"><div class="cp-ttl">聯賽分配</div><div class="cp-mon"><button data-act="mprev" aria-label="上個月">‹</button><b>'+UI.mon.slice(0,4)+'/'+UI.mon.slice(5)+'</b><button data-act="mnext" aria-label="下個月">›</button></div><span class="cp-sv" id="cpSv"></span></div>'+
-    '<div class="cp-tabs" data-sk="tab"><button class="cp-tab'+(UI.tab==='plan'?' on':'')+'" data-tab="plan">分配</button><button class="cp-tab'+(UI.tab==='roster'?' on':'')+'" data-tab="roster">名冊'+(R.inbox.length?'<span class="cp-dot">'+R.inbox.length+'</span>':'')+'</button><button class="cp-tab'+(UI.tab==='shell'?' on':'')+'" data-tab="shell">殼子</button></div></div></div><div class="cp-wrap">';
+    '<div class="cp-tabs" data-sk="tab"><button class="cp-tab'+(UI.tab==='plan'?' on':'')+'" data-tab="plan">分配</button><button class="cp-tab'+(UI.tab==='who'?' on':'')+'" data-tab="who">到齊了沒</button><button class="cp-tab'+(UI.tab==='roster'?' on':'')+'" data-tab="roster">名冊'+(R.inbox.length?'<span class="cp-dot">'+R.inbox.length+'</span>':'')+'</button><button class="cp-tab'+(UI.tab==='shell'?' on':'')+'" data-tab="shell">殼子</button></div></div></div><div class="cp-wrap">';
   if(UI.conflict)h+='<div class="cp-bar">'+esc(UI.conflict)+'<button data-act="reload">重新載入</button></div>';
-  h+=UI.tab==='plan'?drawPlan():UI.tab==='roster'?drawRoster():drawShells();
+  h+=UI.tab==='plan'?drawPlan():UI.tab==='who'?drawWho():UI.tab==='roster'?drawRoster():drawShells();
   h+='</div>';
   var y=window.scrollY;app.innerHTML=h;window.scrollTo(0,y);drawSave();
 }
 function act(e){
   var b=e.target.closest('button,[data-det]');if(!b)return;var d=b.dataset;
-  if(d.tab){UI.tab=d.tab;UI.det='';draw();window.scrollTo(0,0);return}
+  if(d.tab){UI.tab=d.tab;UI.det='';whoHash();draw();window.scrollTo(0,0);if(UI.tab==='who'){whoPull();whoAuto()}return}
+  if(whoAct(d))return;
   if(d.act==='mprev'||d.act==='mnext'){UI.mon=monAdd(UI.mon,d.act==='mprev'?-1:1);UI.conflict='';boot();return}
   if(d.act==='reload'){UI.conflict='';boot();return}
   if(d.act==='new'){newPlan();savePlan();draw();return}
@@ -1082,7 +1276,7 @@ function boot(){
   /* 載入畫面：ETC 隊徽一亮一暗＋幾張灰色的卡（形狀跟殼子卡一樣），資料到了直接換成真的、淡入 */
   var sk=function(n){var h='<div class="cp-sk"><div class="cp-skh"><b></b><i></i></div>';for(var k=0;k<n;k++)h+='<i></i>';return h+'</div>'};
   $('cpApp').innerHTML='<div class="cp-ld"><img class="cp-ldl" src="img/etc-96.png" alt=""><div class="cp-wrap">'+sk(4)+sk(3)+sk(3)+'</div></div>';
-  loadAll().then(function(){NEED.at=P.at||'';draw();cpFadeIn();needCheck()}).catch(function(){$('cpApp').innerHTML='<div class="cp-wrap"><div class="cp-bar" style="margin-top:30vh">讀不到資料<button data-act="reload">再試一次</button></div></div>'});
+  loadAll().then(function(){NEED.at=P.at||'';draw();cpFadeIn();needCheck();if(UI.tab==='who')whoAuto()}).catch(function(){$('cpApp').innerHTML='<div class="cp-wrap"><div class="cp-bar" style="margin-top:30vh">讀不到資料<button data-act="reload">再試一次</button></div></div>'});
 }
 function gate(){
   var ok=false;try{ok=localStorage.getItem('cpl_pass')===CP_PASS}catch(e){}
@@ -1095,6 +1289,7 @@ function gate(){
   $('cpPw').addEventListener('input',function(){if(this.value===CP_PASS){try{localStorage.setItem('cpl_pass',CP_PASS)}catch(x){}boot()}});
 }
 UI.mon=monDef();
+if(location.hash==='#who')UI.tab='who';
 document.addEventListener('click',act);
 document.addEventListener('change',onChange);
 document.addEventListener('input',onInput);
