@@ -432,7 +432,7 @@ button:active{transform:scale(.95)}
 <div id="cpApp"></div>
 <script>
 /* ======== 設定 ======== */
-var CP_VERSION='2026-11-27a';
+var CP_VERSION='2026-11-28b';
 var SUPA_URL='https://evmfmwpsgnccnsaxlafz.supabase.co', SUPA_KEY='sb_publishable_y1ObqeSRZ4AD8pMSeZ1zsQ_nvtd_aFQ';
 var CP_G='legend1';
 var CP_PASS='2330';   /* 進這頁的密碼（他決定） */
@@ -711,6 +711,15 @@ function favPut(x){
 
 /* ======== 分配 ======== */
 function favOn(){return F.filter(function(x){return x&&!x.off&&x.show!==false}).sort(function(a,b){return (a.o==null?99:a.o)-(b.o==null?99:b.o)||String(a.t).localeCompare(String(b.t))})}
+/* 部落的名字、隊徽（11/28）：ClashKing 有在追的才有快取；沒有就從它的部落戰紀錄拿（跟統計頁 cwlClanInfo 同一招） */
+function clanInfo(t){
+  var e=encodeURIComponent(t),get=function(u){return fetch(u).then(function(r){return r.ok?r.json():null}).catch(function(){return null})},
+    pk=function(c){return c&&c.name?{n:c.name,b:(c.badgeUrls||{}).small||''}:null};
+  return get('https://api.clashk.ing/v2/clan/'+e+'/cached').then(function(c){return pk(c)||
+    get('https://api.clashk.ing/v2/clan/'+e+'/wars?limit=1').then(function(w){
+      var x=w&&Array.isArray(w.items)&&w.items[0];
+      return x?pk(x.clan&&x.clan.tag===t?x.clan:x.opponent&&x.opponent.tag===t?x.opponent:null):null})});
+}
 function shellInfo(t){var c=P.cl[t]||{},f=F.filter(function(x){return x.t===t})[0]||{};return {n:c.n||f.n||t,b:c.b||f.b||'',lg:lgZh(c.lg)}}
 function lastSize(t){   /* 上一次在這個殼子打的人數（15／30），沒紀錄就 15 */
   var best=['',15];
@@ -1202,6 +1211,13 @@ function drawRoster(){
       h+='</div>';
     }
   }
+  h+='<div id="cpRL">'+rosterList()+'</div>';
+  h+='<div class="cp-in"><input id="cpNewP" placeholder="新成員的 Line 暱稱"><button class="cp-btn" data-act="newp">新增</button></div>';
+  return h;
+}
+/* 名冊的成員名單（11/28 從 drawRoster 拆出來）：搜尋框打字只換這塊——整頁重畫會把搜尋框換掉，注音選字就斷掉 */
+function rosterList(){
+  var h='';
   var q=(UI.rq||'').trim().toLowerCase(),RA=planAll(),RO=rfOn(),RS=UI.rs||'rk';
   var L=R.people.filter(function(p){
     if(RO&&!(p.a||[]).some(function(t){return rfHit(t,RA)}))return false;
@@ -1225,9 +1241,10 @@ function drawRoster(){
     h+='</div>';
   });
   if(!L.length)h+='<div class="cp-empty">找不到</div>';
-  h+='</div><div class="cp-in"><input id="cpNewP" placeholder="新成員的 Line 暱稱"><button class="cp-btn" data-act="newp">新增</button></div>';
+  h+='</div>';
   return h;
 }
+function rqList(){var b=$('cpRL');if(b)b.innerHTML=rosterList();else draw()}
 function poolHits(q){   /* 名冊外、在殼子或 ETC 的人：打名字就找得到 */
   q=q.trim().toLowerCase();if(!q)return [];
   var L=[];
@@ -1363,8 +1380,7 @@ function act(e){
     var f=F.filter(function(z){return z.t===tg2})[0];
     if(f){f.off=false;f.show=true}else{f={t:tg2,n:tg2,o:F.length,at:new Date().toISOString(),off:false,show:true};F.push(f)}
     favPut(f).then(function(ok){if(!ok)toast('沒存到')});
-    fetch('https://api.clashk.ing/v2/clan/'+encodeURIComponent(tg2)+'/cached').then(function(r){return r.ok?r.json():null}).then(function(c){
-      if(c&&c.name){f.n=c.name;f.b=(c.badgeUrls||{}).small||'';favPut(f);draw()}}).catch(function(){});
+    clanInfo(tg2).then(function(c){if(c){f.n=c.n;f.b=c.b;favPut(f);draw()}});
     if(PL&&!PL.sh.some(function(z){return z.t===tg2})){PL.sh.push({t:tg2,size:lastSize(tg2),a:[]});savePlan()}
     draw();return;
   }
@@ -1376,7 +1392,7 @@ function onChange(e){
 }
 function onInput(e){
   var el=e.target,d=el.dataset;
-  if(el.id==='cpRQ'){UI.rq=el.value;var pos=el.selectionStart;draw();var n=$('cpRQ');n.focus();try{n.setSelectionRange(pos,pos)}catch(x){}return}
+  if(el.id==='cpRQ'){UI.rq=el.value;if(!e.isComposing)rqList();return}   /* 11/28：只換底下名單、搜尋框不動；注音還在選字先不篩 */
   if(d.ain){var box=$('cpPool_'+d.ain);if(!box)return;var L=cpTag(el.value)&&el.value.length>=6?[]:poolHits(el.value);
     box.innerHTML=L.length?'<div class="cp-pool">'+L.map(function(x){return '<button data-padd="'+esc(x[0])+'" data-pid="'+esc(d.ain)+'">'+esc(x[1])+'<small>'+esc(x[0])+'</small></button>'}).join('')+'</div>':''}
 }
@@ -1403,6 +1419,7 @@ if(location.hash==='#who')UI.tab='who';
 document.addEventListener('click',act);
 document.addEventListener('change',onChange);
 document.addEventListener('input',onInput);
+document.addEventListener('compositionend',function(e){if(e.target.id==='cpRQ'){UI.rq=e.target.value;rqList()}});   /* 注音選完字才篩（11/28） */
 function cpFadeIn(){var a=$('cpApp');a.classList.remove('cp-fi');void a.offsetWidth;a.classList.add('cp-fi');setTimeout(function(){a.classList.remove('cp-fi')},450)}
 /* 按鈕手感（UX 11/25）：亮的那格是一塊另外的底（cp-ind），每次重畫從上一次的位置滑到新的位置 */
 var SEG_POS={};
