@@ -120,6 +120,9 @@ input:focus{border-color:var(--line2)}
 .cp-th{font-size:11px;color:var(--tx3);border:1px solid var(--line);border-radius:5px;padding:1px 4px;margin-right:6px;font-variant-numeric:tabular-nums}
 .cp-th.low{color:var(--warm);border-color:rgba(214,160,95,.5)}
 .cp-sub{padding:7px 12px 5px;font-size:12px;color:var(--tx3);background:rgba(0,0,0,.12);border-top:1px solid var(--line)}
+.cp-addr{display:flex;border-top:1px solid var(--line)}
+.cp-addr .cp-add{border-top:0;flex:1;min-width:0}
+.cp-addr .cp-pcl{flex:none;padding:11px 14px;color:var(--soft);font-weight:500;border-left:1px solid var(--line);white-space:nowrap}
 .cp-add{display:block;width:100%;padding:11px 12px;text-align:left;color:var(--soft);font-weight:500;border-top:1px solid var(--line)}
 /* 到齊了沒（11/25）：總覽沿用分配頁那張；卡片右上大數字＝已到／排了幾個（主力），全部到齊變綠 */
 .cp-dqv{margin:14px 0 4px;padding:4px 0;background:linear-gradient(180deg,#1f2535,#191e2c);border:1px solid #2a3248;border-radius:14px}
@@ -429,7 +432,7 @@ button:active{transform:scale(.95)}
 <div id="cpApp"></div>
 <script>
 /* ======== 設定 ======== */
-var CP_VERSION='2026-11-25d';
+var CP_VERSION='2026-11-27a';
 var SUPA_URL='https://evmfmwpsgnccnsaxlafz.supabase.co', SUPA_KEY='sb_publishable_y1ObqeSRZ4AD8pMSeZ1zsQ_nvtd_aFQ';
 var CP_G='legend1';
 var CP_PASS='2330';   /* 進這頁的密碼（他決定） */
@@ -505,7 +508,7 @@ var FLOW_ICON={'鉛筆':'thrower','藍胖':'super-bowler','雙龍':['dragon','dr
   '火球馬雲':'super-minion','火球超女巫':'super-witch','火球阿婆':'ruin-witch','狗球':'balloon','超雪':'super-yeti','超弓':'super-archer','火球小拳石':'xiaoquanshi','超龍':'gold-dragon','雷龍':'electro-dragon','氣球小隊':'sq/199',
   '積木':'jimu','大金龍':'gold-dragon'};
 var FLOW_FIREBALL={'火球馬雲':1,'火球超女巫':1,'火球阿婆':1,'火球小拳石':1};
-var VAR_INFO={'背包鉛筆':['鉛筆','beibao'],'發牌鉛筆':['鉛筆','fapai'],'背包雙龍':['雙龍','beibao'],'發牌雙龍':['雙龍','fapai'],
+var VAR_INFO={'背包鉛筆':['鉛筆','beibao'],'發牌鉛筆':['鉛筆','fapai'],'背包雙龍':['雙龍','beibao'],'發牌雙龍':['雙龍','fapai'],'雙龍（小隊）':['雙龍',''],
   '擊暈器藍胖':['藍胖','jiyunqi',1],'發牌藍胖':['藍胖','fapai',1],'牙心藍胖':['藍胖','dianya',1],
   '火球傳送狗球':['狗球','chuansong'],'傳送超龍':['超龍','chuansong']};
 var SHIELD_SVG='<svg viewBox="0 0 24 24"><path d="M12 2.5 4 5.5v6c0 5 3.4 8.6 8 10 4.6-1.4 8-5 8-10v-6z" fill="none" stroke="#9aa3bb" stroke-width="2"/></svg>';
@@ -519,7 +522,7 @@ function flowIcon(fl,v){
   else if(fl==='其他')h='<span class="fic q"'+ring+'>?</span>';
   else h='<span class="fic'+(fl.length>2?' txt':'')+'"'+ring+'>'+esc(fl)+'</span>';
   if(FLOW_FIREBALL[fl])h+='<img class="ffb" src="img/fireball.webp" alt="">';
-  else if(v&&VAR_INFO[v]&&VAR_INFO[v][0]===fl)h+='<img class="ffb'+(Array.isArray(k)?'':' ffv')+(VAR_INFO[v][2]?' ffl':'')+'" src="img/'+VAR_INFO[v][1]+'.webp" alt="">';   /* 變體的角標（2026-10-17）；一張頭像的放大一點（他 10/17 說太小），雙龍兩張並排的照舊；藍胖掛左下 */
+  else if(v&&VAR_INFO[v]&&VAR_INFO[v][0]===fl&&VAR_INFO[v][1])h+='<img class="ffb'+(Array.isArray(k)?'':' ffv')+(VAR_INFO[v][2]?' ffl':'')+'" src="img/'+VAR_INFO[v][1]+'.webp" alt="">';   /* 變體的角標（2026-10-17）；一張頭像的放大一點（他 10/17 說太小），雙龍兩張並排的照舊；藍胖掛左下 */
   return '<span class="ficw">'+h+'</span>';
 }
 var OTHER_NOTE_ICON=[[/傳送.*(金龍|超龍)|(金龍|超龍).*傳送/,'gold-dragon','chuansong'],[/金龍|超龍/,'gold-dragon'],['雷龍','electro-dragon'],['積木','jimu'],
@@ -736,6 +739,23 @@ function copy(s){
   else{fallbackCopy(s);ok()}
 }
 function fallbackCopy(s){var t=document.createElement('textarea');t.value=s;t.style.position='fixed';t.style.opacity='0';document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(e){}t.remove()}
+/* 單獨帶入一個部落（11/27 他：「單獨拉一個部落上個月的名單」）：上個月在這個部落打、現在還沒排到任何地方的人（照打的場數多到少） */
+function pullList(t){
+  var pm=monAdd(UI.mon,-1),all=planAll(),L=[];
+  R.people.forEach(function(p){(p.a||[]).forEach(function(a){
+    var c=((P.a[a]||{}).cw||[]).filter(function(x){return x[0]===pm&&x[1]===t})[0];
+    if(c&&!all[a])L.push([a,c[5],nameOf(a)])})});
+  L.sort(function(a,b){return b[1]-a[1]||a[2].localeCompare(b[2])||a[0].localeCompare(b[0])});
+  return L.map(function(x){return x[0]});
+}
+function pullClan(t){
+  var s=PL.sh.filter(function(z){return z.t===t})[0];if(!s)return;
+  var L=pullList(t);if(!L.length)return;
+  L.forEach(function(a){s.a.push(a)});savePlan();draw();
+  toastAct('帶入 '+L.length+' 個到 '+shellInfo(t).n,'復原',function(){
+    s.a=s.a.filter(function(x){return L.indexOf(x)<0});savePlan();draw();toast('已復原');
+  },5000);
+}
 function fromLast(){   /* 照上個月實際上場的帶入（ClashKing 記的出場紀錄） */
   var pm=monAdd(UI.mon,-1),n=0,u={};
   PL.sh.forEach(function(s){u[s.t]=s.a.slice()});PL.undo={a:u,rest:(PL.rest||[]).slice()};   /* 帶入前的樣子（他 11/16：要能一鍵返回） */
@@ -800,7 +820,8 @@ function drawPlan(){
     h+='<div class="cp-card" id="cpc_'+esc(s.t.slice(1))+'"><div class="cp-ch">'+(i.b?'<img src="'+esc(i.b)+'" alt="">':'')+'<div class="cp-cn"><b>'+esc(i.n)+'</b><span>'+(z?lgTag(z)+' · ':'')+s.size+' 人</span></div><span class="cp-cnt '+c+'">'+Math.min(n,s.size)+'/'+s.size+'</span>'+'<button class="cp-ic" data-copy="'+si+'" aria-label="分享">'+IC.share+'</button></div><div>';
     h+=shellFlows(s);
     s.a.forEach(function(t,k){if(k===s.size)h+='<div class="cp-sub">候補</div>';h+=rowHtml(t,k,s.t)});
-    h+='</div><button class="cp-add" data-pick="'+esc(s.t)+'">＋ 加人</button></div>';
+    var pc=pullList(s.t).length;
+    h+='</div><div class="cp-addr"><button class="cp-add" data-pick="'+esc(s.t)+'">＋ 加人</button>'+(pc?'<button class="cp-pcl" data-pullc="'+esc(s.t)+'">帶入 '+monZh(monAdd(UI.mon,-1))+'名單 '+pc+'</button>':'')+'</div></div>';
   });
   h+='<div class="cp-card"><div class="cp-ch"><div class="cp-cn"><b>休</b><span>這個月不打</span></div><span class="cp-cnt">'+(PL.rest||[]).length+'</span></div><div>';
   (PL.rest||[]).forEach(function(t,k){h+=rowHtml(t,k,'rest')});
@@ -1295,6 +1316,7 @@ function act(e){
     var pk=pv.toLowerCase(),pp=R.people.filter(function(p){return pName(p).trim().toLowerCase()===pk||String(p.line||'').trim().toLowerCase()===pk})[0];
     if(pp){if(pp.a.indexOf(pt)<0)pp.a.push(pt)}else R.people.push({id:'p'+Date.now().toString(36),line:pv,dc:'',a:[pt]});
     saveRoster();UI.sheet.pf='';addTo(pt,UI.sheet.to);drawSheet();return}
+  if(d.pullc){pullClan(d.pullc);return}   /* 單獨帶入一個部落（11/27） */
   if(d.rm){   /* ⑥（首領第一次 11/25）拿掉之後那句可以復原，放回原本的位置 */
     var rt=d.t;if(!PL.rest)PL.rest=[];var ra=d.rm==='rest'?PL.rest:(PL.sh.filter(function(s){return s.t===d.rm})[0]||{}).a;if(!ra)return;var rk=ra.indexOf(rt);if(rk<0)return;
     ra.splice(rk,1);savePlan();draw();
